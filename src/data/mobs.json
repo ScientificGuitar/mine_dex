@@ -1,0 +1,92 @@
+{
+  "zombie": {
+    "name": "Zombie",
+    "rarity": "Common",
+    "image": "https://static.wikia.nocookie.net/minecraft_gamepedia/images/8/87/Zombie_JE3_BE2.png/revision/latest?cb=20191227070025",
+    "lore": "Lorem ipsum dolor sit amet."
+  },
+  "creeper": {
+    "name": "Creeper",
+    "rarity": "Common",
+    "image": "https://static.wikia.nocookie.net/minecraft_gamepedia/images/5/5b/Creeper_JE2_BE1.png/revision/latest?cb=20191229172043",
+    "lore": "Lorem ipsum dolor sit amet."
+  },
+  "spider": {
+    "name": "Spider",
+    "rarity": "Common",
+    "image": "https://static.wikia.nocookie.net/minecraft_gamepedia/images/1/1f/Spider_JE4_BE3.png/revision/latest?cb=20240729213340",
+    "lore": "Lorem ipsum dolor sit amet."
+  },
+  "skeleton": {
+    "name": "Skeleton",
+    "rarity": "Common",
+    "image": "https://static.wikia.nocookie.net/minecraft_gamepedia/images/4/47/Skeleton_JE6_BE4.png/revision/latest?cb=20210227130136",
+    "lore": "Lorem ipsum dolor sit amet."
+  },
+  "witch": {
+    "name": "Witch",
+    "rarity": "Uncommon",
+    "image": "https://static.wikia.nocookie.net/minecraft_gamepedia/images/e/e6/Witch.png/revision/latest?cb=20220611062944",
+    "lore": "Lorem ipsum dolor sit amet."
+  },
+  "stray": {
+    "name": "Stray",
+    "rarity": "Uncommon",
+    "image": "https://static.wikia.nocookie.net/minecraft_gamepedia/images/3/38/Stray_JE2_BE4.png/revision/latest?cb=20191001180649",
+    "lore": "Lorem ipsum dolor sit amet."
+  },
+  "enderman": {
+    "name": "Enderman",
+    "rarity": "Rare",
+    "image": "https://static.wikia.nocookie.net/minecraft_gamepedia/images/2/28/Enderman.png/revision/latest/scale-to-width-down/1000?cb=20240729214332",
+    "lore": "Lorem ipsum dolor sit amet."
+  },
+  "ghast": {
+    "name": "Ghast",
+    "rarity": "Rare",
+    "image": "https://static.wikia.nocookie.net/minecraft_gamepedia/images/3/34/Ghast_New.gif/revision/latest?cb=20250625155222",
+    "lore": "Lorem ipsum dolor sit amet."
+  },
+  "slime": {
+    "name": "Slime",
+    "rarity": "Rare",
+    "image": "https://static.wikia.nocookie.net/minecraft_gamepedia/images/d/dd/Slime_JE3_BE2.png/revision/latest?cb=20191230025505",
+    "lore": "Lorem ipsum dolor sit amet."
+  },
+  "blaze": {
+    "name": "Blaze",
+    "rarity": "Epic",
+    "image": "https://static.wikia.nocookie.net/minecraft_gamepedia/images/5/5a/Blaze.gif/revision/latest?cb=20230214143150",
+    "lore": "Lorem ipsum dolor sit amet."
+  },
+  "wither_skeleton": {
+    "name": "Wither Skeleton",
+    "rarity": "Epic",
+    "image": "https://static.wikia.nocookie.net/minecraft_gamepedia/images/c/cd/Wither_Skeleton.png/revision/latest?cb=20191229162539",
+    "lore": "Lorem ipsum dolor sit amet."
+  },
+  "iron_golem": {
+    "name": "Iron Golem",
+    "rarity": "Epic",
+    "image": "https://static.wikia.nocookie.net/minecraft_gamepedia/images/0/02/Iron_Golem_JE2_BE2.png/revision/latest?cb=20190605101959",
+    "lore": "Lorem ipsum dolor sit amet."
+  },
+  "ender_dragon": {
+    "name": "Ender Dragon",
+    "rarity": "Legendary",
+    "image": "https://static.wikia.nocookie.net/minecraft_gamepedia/images/0/0a/Ender_Dragon.gif/revision/latest?cb=20210107043116",
+    "lore": "Lorem ipsum dolor sit amet."
+  },
+  "wither": {
+    "name": "Wither",
+    "rarity": "Legendary",
+    "image": "https://static.wikia.nocookie.net/minecraft_gamepedia/images/3/3b/Wither_JE2_BE2.png/revision/latest?cb=20240729214341",
+    "lore": "Lorem ipsum dolor sit amet."
+  },
+  "elytra_phantom": {
+    "name": "Phantom",
+    "rarity": "Legendary",
+    "image": "https://static.wikia.nocookie.net/minecraft_gamepedia/images/3/39/Phantom_JE2.gif/revision/latest?cb=20180706142237",
+    "lore": "Lorem ipsum dolor sit amet."
+  }
+}
