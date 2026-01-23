@@ -22,6 +22,7 @@ RARITY_EMERALD_REWARDS = {
     "Epic": 8,
     "Legendary": 15,
 }
+VALID_TOKEN_RARITIES = ["uncommon", "rare", "epic"]
 
 
 class Rolls(commands.Cog):
@@ -65,6 +66,8 @@ class Rolls(commands.Cog):
 
         User.ensure_user(self.bot.db, guild_id, user_id)
 
+        # TODO: Check that user has the Toolsmith villager
+
         if User.has_claimed_today(self.bot.db, guild_id, user_id, now):
             await ctx.send("❌ You've already claimed today.")
             return
@@ -90,7 +93,27 @@ class Rolls(commands.Cog):
         )
 
     @commands.command()
-    async def roll(self, ctx):
+    async def roll(self, ctx, mode: str = None, value: str = None):
+        mode = mode.lower() if mode else None
+        value = value.lower() if value else None
+        if mode is None:
+            roll_type = "standard"
+        elif mode == "focus":
+            # TODO: Logic to check if user has unlocked the Librarian villager
+            roll_type = mode
+        elif mode == "token":
+            if value is None:
+                await ctx.send("❌ You must specify a token rarity (e.g. `uncommon`, `rare`, `epic`).")
+                return
+            if value not in VALID_TOKEN_RARITIES:
+                await ctx.send(f"❌ Invalid token rarity. Valid options: {', '.join(VALID_TOKEN_RARITIES)}")
+                return
+            roll_type = mode
+            token_id = f"token_{value}_roll"
+        else:
+            await ctx.send("❌ Invalid roll type. Try `$roll`, `$roll focus`, or `$roll token <rarity>`.")
+            return
+
         guild_id = ctx.guild.id
         user_id = ctx.author.id
         now = int(time.time())
@@ -111,9 +134,19 @@ class Rolls(commands.Cog):
         #     await ctx.send(msg)
         #     return
 
-        mob_id, mob = self.roll_random_mob()
-
-        User.record_roll(self.bot.db, guild_id, user_id, now)
+        if roll_type == "standard":
+            mob_id, mob = self.roll_random_mob()
+            User.record_roll(self.bot.db, guild_id, user_id, now)
+        elif roll_type == "focus":
+            if User.has_focus_rolled_today(self.bot.db, guild_id, user_id, now):
+                await ctx.send("❌ You've already focus rolled today.")
+                return
+            mob_id, mob = self.roll_random_mob(exclude={"Common"})
+            User.record_focus_roll(self.bot.db, guild_id, user_id, now)
+        elif roll_type == "token":
+            # TODO: Check if user has token and remove from inventory
+            mob_id, mob = self.roll_random_mob(allowed={value.capitalize()})
+            User.record_roll(self.bot.db, guild_id, user_id, now)
 
         embed = discord.Embed(
             title=mob["name"],
@@ -127,15 +160,20 @@ class Rolls(commands.Cog):
             view=Claim(bot=self.bot, guild_id=guild_id, user_id=ctx.author.id, mob_id=mob_id, mob=mob),
         )
 
-    def roll_random_mob(self):
-        rarity = Rolls.roll_rarity()
+    def roll_random_mob(self, exclude=None, allowed=None):
+        rarity = Rolls.roll_rarity(exclude, allowed)
         mob = random.choice(self.bot.mobs_by_rarity[rarity])
         return mob, self.bot.mobs[mob]
 
     @staticmethod
-    def roll_rarity():
-        rarities = list(RARITY_WEIGHTS.keys())
-        weights = list(RARITY_WEIGHTS.values())
+    def roll_rarity(exclude=None, allowed=None):
+        exclude = exclude or set()
+        if allowed:
+            rarities = [r for r in allowed if r in RARITY_WEIGHTS]
+        else:
+            rarities = [r for r in RARITY_WEIGHTS if r not in exclude]
+        weights = [RARITY_WEIGHTS[r] for r in rarities]
+
         return random.choices(rarities, weights=weights, k=1)[0]
 
     def build_collection_embed(self, ctx, rows):
