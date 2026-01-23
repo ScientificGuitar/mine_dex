@@ -2,7 +2,8 @@ import discord
 from discord.ext import commands
 import random
 from discord import Colour
-from db.operations import User, Collection
+from db.collection import Collection
+from db.user import User
 import time
 from collections import defaultdict
 
@@ -55,6 +56,38 @@ class Rolls(commands.Cog):
 
         embed = self.build_collection_embed(ctx, rows)
         await ctx.send(embed=embed)
+
+    @commands.command()
+    async def reroll(self, ctx):
+        guild_id = ctx.guild.id
+        user_id = ctx.author.id
+        now = int(time.time())
+
+        User.ensure_user(self.bot.db, guild_id, user_id)
+
+        if User.has_claimed_today(self.bot.db, guild_id, user_id, now):
+            await ctx.send("❌ You've already claimed today.")
+            return
+
+        if User.has_rerolled_today(self.bot.db, guild_id, user_id, now):
+            await ctx.send("❌ You've already rerolled today.")
+            return
+
+        mob_id, mob = self.roll_random_mob()
+
+        User.record_reroll(self.bot.db, guild_id, user_id, now)
+
+        embed = discord.Embed(
+            title=mob["name"],
+            color=RARITY_COLORS.get(mob["rarity"], 0x2F3136),
+        )
+        embed.set_image(url=mob["image"])
+        embed.set_footer(text=f"Rerolled by: {ctx.author.display_name}")
+
+        await ctx.send(
+            embed=embed,
+            view=Claim(bot=self.bot, guild_id=guild_id, user_id=ctx.author.id, mob_id=mob_id, mob=mob),
+        )
 
     @commands.command()
     async def roll(self, ctx):

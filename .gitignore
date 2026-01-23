@@ -11,3 +11,4 @@ wheels/
 
 # Development generated files
 *.log
+*.db

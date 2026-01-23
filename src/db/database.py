@@ -36,7 +36,7 @@ def init_db(conn: sqlite3.Connection) -> None:
         amount  INTEGER NOT NULL DEFAULT 1,
         PRIMARY KEY (guild_id, user_id, mob_id),
         FOREIGN KEY (guild_id, user_id)
-            REFERENCES guild_users (guild_id, user_id)
+            REFERENCES users (guild_id, user_id)
             ON DELETE CASCADE
     );
                          
@@ -59,7 +59,7 @@ def init_db(conn: sqlite3.Connection) -> None:
         item_id      TEXT NOT NULL,
         amount       INTEGER NOT NULL DEFAULT 0,
 
-        PRIMARY KEY (guild_id, user_id, token_type),
+        PRIMARY KEY (guild_id, user_id, item_id),
 
         FOREIGN KEY (guild_id, user_id)
             REFERENCES users (guild_id, user_id)
