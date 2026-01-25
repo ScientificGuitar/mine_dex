@@ -23,6 +23,13 @@ RARITY_EMERALD_REWARDS = {
     "Legendary": 15,
 }
 VALID_TOKEN_RARITIES = ["uncommon", "rare", "epic"]
+RARITY_EMOJIS = {
+    "Common": ":white_circle:",
+    "Uncommon": ":green_circle:",
+    "Rare": ":blue_circle:",
+    "Epic": ":purple_circle:",
+    "Legendary": ":orange_circle:",
+}
 
 
 class Rolls(commands.Cog):
@@ -160,6 +167,72 @@ class Rolls(commands.Cog):
             view=Claim(bot=self.bot, guild_id=guild_id, user_id=ctx.author.id, mob_id=mob_id, mob=mob),
         )
 
+    @commands.command()
+    async def mob(self, ctx, mob_id: str):
+        mob_id = mob_id.lower()
+        mob = self.bot.mobs.get(mob_id)
+        if not mob:
+            await ctx.send("❌ That mob does not exist.")
+            return
+
+        rarity = mob["rarity"]
+        color = RARITY_COLORS[rarity]
+
+        embed = discord.Embed(title=f"{mob['name']}", color=color)
+        embed.set_image(url=mob["image"])
+        embed.set_footer(text=f"Mob ID: {mob_id}")
+
+        await ctx.send(embed=embed)
+
+    @commands.command()
+    async def mobs(self, ctx, rarity: str = None):
+        if rarity:
+            await self._mobs_by_rarity(ctx, rarity)
+            return
+
+        embed = discord.Embed(
+            title="📘 Mob Bestiary", description="All known mobs, grouped by rarity.", color=discord.Color.dark_gray()
+        )
+
+        for rarity_name, mob_ids in self.bot.mobs_by_rarity.items():
+            if not mob_ids:
+                continue
+
+            mob_names = [self.bot.mobs[mob_id]["name"] for mob_id in mob_ids]
+
+            embed.add_field(
+                name=f"{RARITY_EMOJIS[rarity_name]} {rarity_name}", value="• " + "\n• ".join(mob_names), inline=False
+            )
+
+        embed.set_footer(
+            text="Use $mobs <rarity> to filter by rarity\nUser $mob <mob_name> for more information about a specific mob"
+        )
+        await ctx.send(embed=embed)
+
+    async def _mobs_by_rarity(self, ctx, rarity: str):
+        rarity = rarity.capitalize()
+
+        if rarity not in self.bot.mobs_by_rarity:
+            valid = ", ".join(self.bot.mobs_by_rarity.keys())
+            await ctx.send(f"❌ Invalid rarity. Valid options: {valid}")
+            return
+
+        mob_ids = self.bot.mobs_by_rarity[rarity]
+        if not mob_ids:
+            await ctx.send(f"❌ No mobs found for rarity: {rarity}")
+            return
+
+        mob_names = [self.bot.mobs[mob_id]["name"] for mob_id in mob_ids]
+
+        embed = discord.Embed(
+            title=f"{RARITY_EMOJIS[rarity]} {rarity} Mobs",
+            description="• " + "\n• ".join(mob_names),
+            color=RARITY_COLORS[rarity],
+        )
+
+        embed.set_footer(text=f"Total: {len(mob_names)} mobs")
+        await ctx.send(embed=embed)
+
     def roll_random_mob(self, exclude=None, allowed=None):
         rarity = Rolls.roll_rarity(exclude, allowed)
         mob = random.choice(self.bot.mobs_by_rarity[rarity])
@@ -197,6 +270,34 @@ class Rolls(commands.Cog):
                 embed.add_field(name=f"{symbol} {rarity}", value="\n".join(mobs_by_rarity[rarity]), inline=False)
 
         return embed
+
+    @commands.command()
+    async def villager(self, ctx, villager_id: str):
+        villager_id = villager_id.lower()
+        villager = self.bot.villagers.get(villager_id)
+
+        if not villager:
+            await ctx.send("❌ That villager does not exist.")
+            return
+
+        embed = discord.Embed(
+            title=f"{villager['name']}",
+            description=villager["description"],
+            color=discord.Color.gold(),
+        )
+
+        embed.add_field(name="🏛️ Trading Hall Level", value=f"Tier {villager['level']}", inline=False)
+
+        embed.add_field(name="💎 Price", value=f"{villager['price']} emeralds", inline=False)
+
+        embed.add_field(name="📜 Commands", value="\n".join(f"`{cmd}`" for cmd in villager["commands"]), inline=False)
+
+        if "image" in villager:
+            embed.set_thumbnail(url=villager["image"])
+
+        embed.set_footer(text=f"Villager ID: {villager_id}")
+
+        await ctx.send(embed=embed)
 
 
 class Claim(discord.ui.View):
@@ -237,3 +338,4 @@ class Claim(discord.ui.View):
 
 async def setup(bot):
     await bot.add_cog(Rolls(bot))
+

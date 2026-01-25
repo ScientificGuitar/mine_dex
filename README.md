@@ -34,6 +34,7 @@ Each mob belongs to one of the following rarities:
 - Rare
 - Epic
 - Legendary
+
 Rarity determines:
 - Roll probability
 - Emerald reward on claim
@@ -56,13 +57,13 @@ Rarity determines:
 - Shows duplicates where applicable
 - Collection is per-server
 
-### $mob <mob_id>
+### $mob \<mob_id\>
 - Shows detailed info about a specific mob
 
 ### $mobs
 - Lists all mobs, grouped by rarity
 
-### $mobs <rarity>
+### $mobs \<rarity\>
 - Lists mobs of a specific rarity
 
 ## Shop System
@@ -75,7 +76,7 @@ Future categories may include:
 - Tokens & Boosts
 - Special Items
 
-### $shop <category>
+### $shop \<category\>
 - Shows detailed information about a specific shop category.
 
 ## Trading Hall (Progression System)
@@ -137,7 +138,7 @@ When a trade command is issued:
 - Rolls a mob only within that rarity band
 
 ## Villager Information
-### $villager <villager_id>
+### $villager \<villager_id\>
 Displays:
 - Villager image
 - Description
