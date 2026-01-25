@@ -1,34 +1,10 @@
 import discord
 from discord.ext import commands
 import random
-from discord import Colour
 from database.user import User
 import time
 from views.claim import Claim
-
-RARITY_WEIGHTS = {"Common": 55, "Uncommon": 25, "Rare": 13, "Epic": 6, "Legendary": 1}
-RARITY_COLORS = {
-    "Common": Colour.light_grey(),
-    "Uncommon": Colour.green(),
-    "Rare": Colour.blue(),
-    "Epic": Colour.purple(),
-    "Legendary": Colour.orange(),
-}
-RARITY_EMERALD_REWARDS = {
-    "Common": 1,
-    "Uncommon": 2,
-    "Rare": 4,
-    "Epic": 8,
-    "Legendary": 15,
-}
-VALID_TOKEN_RARITIES = ["uncommon", "rare", "epic"]
-RARITY_EMOJIS = {
-    "Common": ":white_circle:",
-    "Uncommon": ":green_circle:",
-    "Rare": ":blue_circle:",
-    "Epic": ":purple_circle:",
-    "Legendary": ":orange_circle:",
-}
+from constants import RARITY_WEIGHTS, RARITY_COLORS, VALID_TOKEN_RARITIES
 
 
 class Rolls(commands.Cog):

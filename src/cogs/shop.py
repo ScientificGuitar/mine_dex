@@ -2,8 +2,7 @@ import discord
 from discord.ext import commands
 from database.user import User
 from views.upgrade_confirm import UpgradeTradingView
-
-TRADING_HALL_ORDER = ["farmer", "cleric", "toolsmith", "librarian"]
+from constants import TRADING_HALL_ORDER
 
 
 class Shop(commands.Cog):

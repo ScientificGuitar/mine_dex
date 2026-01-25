@@ -2,14 +2,7 @@ import discord
 import time
 from database.collection import Collection
 from database.user import User
-
-RARITY_EMERALD_REWARDS = {
-    "Common": 1,
-    "Uncommon": 2,
-    "Rare": 4,
-    "Epic": 8,
-    "Legendary": 15,
-}
+from constants import RARITY_EMERALD_REWARDS
 
 
 class Claim(discord.ui.View):

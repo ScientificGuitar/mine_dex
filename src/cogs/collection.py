@@ -2,24 +2,8 @@ from collections import defaultdict
 from discord.ext import commands
 from database.user import User
 import discord
-from discord import Colour
 from database.collection import Collection
-
-
-RARITY_EMOJIS = {
-    "Common": ":white_circle:",
-    "Uncommon": ":green_circle:",
-    "Rare": ":blue_circle:",
-    "Epic": ":purple_circle:",
-    "Legendary": ":orange_circle:",
-}
-RARITY_COLORS = {
-    "Common": Colour.light_grey(),
-    "Uncommon": Colour.green(),
-    "Rare": Colour.blue(),
-    "Epic": Colour.purple(),
-    "Legendary": Colour.orange(),
-}
+from constants import RARITY_EMOJIS, RARITY_COLORS
 
 
 class CollectionCog(commands.Cog):
