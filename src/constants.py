@@ -26,3 +26,11 @@ RARITY_COLORS = {
 TRADING_HALL_ORDER = ["farmer", "cleric", "toolsmith", "librarian"]
 
 VALID_TOKEN_RARITIES = ["uncommon", "rare", "epic"]
+
+FARMER_EMERALD_VALUES = {
+    "Common": 5,
+    "Uncommon": 12,
+    "Rare": 30,
+    "Epic": 75,
+    "Legendary": 200,
+}

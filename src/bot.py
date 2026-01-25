@@ -46,7 +46,7 @@ async def main():
     conn = get_connection()
     init_db(conn)
 
-    extentions = ["cogs.rolls", "cogs.shop", "cogs.collection", "cogs.economy", "cogs.villagers"]
+    extentions = ["cogs.rolls", "cogs.shop", "cogs.collection", "cogs.economy", "cogs.villagers", "cogs.trade"]
     intents = discord.Intents.default()
     intents.message_content = True
     async with MyBot(

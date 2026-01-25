@@ -24,7 +24,7 @@ class User:
                 (guild_id, user_id),
             ).fetchone()
 
-    def has_focus_rolled_today(conn, guild_id: int, user_id: int, now_ts: int) -> bool:
+    def has_focus_rolled_today(conn: Connection, guild_id: int, user_id: int, now_ts: int) -> bool:
         with conn:
             row = conn.execute(
                 """
@@ -40,7 +40,7 @@ class User:
 
             return same_utc_day(row["last_focus_roll_at"], now_ts)
 
-    def record_roll(conn, guild_id, user_id, now_ts) -> None:
+    def record_roll(conn: Connection, guild_id, user_id, now_ts) -> None:
         with conn:
             conn.execute(
                 """
@@ -51,7 +51,7 @@ class User:
                 (now_ts, guild_id, user_id),
             )
 
-    def record_reroll(conn, guild_id, user_id, now_ts) -> None:
+    def record_reroll(conn: Connection, guild_id, user_id, now_ts) -> None:
         with conn:
             conn.execute(
                 """
@@ -62,7 +62,7 @@ class User:
                 (now_ts, guild_id, user_id),
             )
 
-    def record_focus_roll(conn, guild_id, user_id, now_ts) -> None:
+    def record_focus_roll(conn: Connection, guild_id, user_id, now_ts) -> None:
         with conn:
             conn.execute(
                 """
@@ -73,7 +73,7 @@ class User:
                 (now_ts, guild_id, user_id),
             )
 
-    def update_last_claim_at(conn, guild_id: int, user_id: int, timestamp: int) -> None:
+    def update_last_claim_at(conn: Connection, guild_id: int, user_id: int, timestamp: int) -> None:
         with conn:
             conn.execute(
                 """
@@ -84,7 +84,7 @@ class User:
                 (timestamp, guild_id, user_id),
             )
 
-    def add_emeralds(conn, guild_id: int, user_id: int, amount: int) -> None:
+    def add_emeralds(conn: Connection, guild_id: int, user_id: int, amount: int) -> None:
         with conn:
             conn.execute(
                 """
@@ -95,7 +95,7 @@ class User:
                 (amount, guild_id, user_id),
             )
 
-    def get_emeralds(conn, guild_id: int, user_id: int) -> tuple | None:
+    def get_emeralds(conn: Connection, guild_id: int, user_id: int) -> tuple | None:
         with conn:
             return conn.execute(
                 """
@@ -106,7 +106,7 @@ class User:
                 (guild_id, user_id),
             ).fetchone()
 
-    def get_trading_hall_level(conn, guild_id: int, user_id: int) -> tuple | None:
+    def get_trading_hall_level(conn: Connection, guild_id: int, user_id: int) -> tuple | None:
         with conn:
             return conn.execute(
                 """
@@ -116,6 +116,17 @@ class User:
                 """,
                 (guild_id, user_id),
             ).fetchone()
+
+    def upgrade_trading_hall(conn: Connection, guild_id: int, user_id: int) -> None:
+        with conn:
+            conn.execute(
+                """
+                UPDATE users
+                SET trading_hall_level = trading_hall_level + 1
+                WHERE guild_id = ? AND user_id = ?
+                """,
+                (guild_id, user_id),
+            )
 
 
 def same_utc_day(ts1: int, ts2: int) -> bool:

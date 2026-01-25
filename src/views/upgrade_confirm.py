@@ -29,7 +29,8 @@ class UpgradeTradingView(discord.ui.View):
             self.stop()
             return
 
-        # TODO: Update user emerlands and tradinghall level
+        User.add_emeralds(self.bot.db, self.guild_id, self.user_id, -price)
+        User.upgrade_trading_hall(self.bot.db, self.guild_id, self.user_id)
 
         embed = interaction.message.embeds[0]
         embed.title = "✅ Trading Hall Upgraded!"
