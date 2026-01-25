@@ -5,7 +5,7 @@ import logging.handlers
 from discord.ext import commands
 import asyncio
 from utils import villager_loader, mob_loader
-from db.database import get_connection, init_db
+from database.db import get_connection, init_db
 
 
 class MyBot(commands.Bot):
@@ -46,7 +46,7 @@ async def main():
     conn = get_connection()
     init_db(conn)
 
-    extentions = ["cogs.rolls", "cogs.shop"]
+    extentions = ["cogs.rolls", "cogs.shop", "cogs.collection", "cogs.economy", "cogs.villagers"]
     intents = discord.Intents.default()
     intents.message_content = True
     async with MyBot(

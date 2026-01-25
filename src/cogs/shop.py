@@ -1,11 +1,6 @@
 import discord
 from discord.ext import commands
-import random
-from discord import Colour
-from db.collection import Collection
-from db.user import User
-import time
-from collections import defaultdict
+from database.user import User
 
 TRADING_HALL_ORDER = ["farmer", "cleric", "toolsmith", "librarian"]
 
