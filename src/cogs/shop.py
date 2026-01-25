@@ -1,6 +1,7 @@
 import discord
 from discord.ext import commands
 from database.user import User
+from views.upgrade_confirm import UpgradeTradingView
 
 TRADING_HALL_ORDER = ["farmer", "cleric", "toolsmith", "librarian"]
 
@@ -125,45 +126,3 @@ def get_villager_by_level(villagers: dict, level: int):
         if villager["level"] == level:
             return villager
         return None
-
-
-class UpgradeTradingView(discord.ui.View):
-    def __init__(self, bot, guild_id: int, user_id: int, villager: dict):
-        super().__init__(timeout=300)
-        self.bot = bot
-        self.guild_id = guild_id
-        self.user_id = user_id
-        self.villager = villager
-
-    async def interaction_check(self, interaction: discord.Interaction) -> bool:
-        if interaction.user.id != self.user_id:
-            await interaction.response.send_message(
-                "❌ Only the player upgrading can use these buttons.", ephemeral=True
-            )
-            return False
-        return True
-
-    @discord.ui.button(label="Confirm Upgrade", style=discord.ButtonStyle.success)
-    async def confirm(self, interaction: discord.Interaction, button: discord.ui.Button):
-        price = self.villager["price"]
-
-        row = User.get_emeralds(self.bot.db, self.guild_id, self.user_id)
-
-        if row["emeralds"] < price:
-            await interaction.response.send_message("❌ You no longer have enough emeralds.", ephemeral=True)
-            self.stop()
-            return
-
-        # TODO: Update user emerlands and tradinghall level
-
-        embed = interaction.message.embeds[0]
-        embed.title = "✅ Trading Hall Upgraded!"
-        embed.color = discord.Color.green()
-        embed.add_field(name="Unlocked", value=f"{self.villager['name']}", inline=False)
-
-        button.disabled = True
-
-        await interaction.response.edit_message(embed=embed, view=self)
-        await interaction.followup.send(f"🏛️ Your Trading Hall is now **Tier {self.villager['level']}**!")
-
-        self.stop()
