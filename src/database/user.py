@@ -1,8 +1,9 @@
 from datetime import datetime, timezone
+from sqlite3 import Connection
 
 
 class User:
-    def ensure_user(conn, guild_id: int, user_id: int) -> None:
+    def ensure_user(conn: Connection, guild_id: int, user_id: int) -> None:
         with conn:
             conn.execute(
                 """
@@ -12,37 +13,16 @@ class User:
                 (guild_id, user_id),
             )
 
-    def has_claimed_today(conn, guild_id: int, user_id: int, now_ts: int) -> bool:
+    def get_user(conn: Connection, guild_id: int, user_id: int) -> tuple:
         with conn:
-            row = conn.execute(
+            return conn.execute(
                 """
-                SELECT last_claim_at
+                SELECT *
                 FROM users
                 WHERE guild_id = ? AND user_id = ?
                 """,
                 (guild_id, user_id),
             ).fetchone()
-
-            if row is None or row["last_claim_at"] is None:
-                return False
-
-            return same_utc_day(row["last_claim_at"], now_ts)
-
-    def has_rerolled_today(conn, guild_id: int, user_id: int, now_ts: int) -> bool:
-        with conn:
-            row = conn.execute(
-                """
-                SELECT last_reroll_at
-                FROM users
-                WHERE guild_id = ? AND user_id = ?
-                """,
-                (guild_id, user_id),
-            ).fetchone()
-
-            if row is None or row["last_reroll_at"] is None:
-                return False
-
-            return same_utc_day(row["last_reroll_at"], now_ts)
 
     def has_focus_rolled_today(conn, guild_id: int, user_id: int, now_ts: int) -> bool:
         with conn:
@@ -59,23 +39,6 @@ class User:
                 return False
 
             return same_utc_day(row["last_focus_roll_at"], now_ts)
-
-    def get_roll_cooldown(conn, guild_id, user_id, now_ts) -> int:
-        with conn:
-            row = conn.execute(
-                """
-                SELECT last_roll_at
-                FROM users
-                WHERE guild_id = ? AND user_id = ?
-                """,
-                (guild_id, user_id),
-            ).fetchone()
-
-        if row is None or row["last_roll_at"] is None:
-            return 0
-
-        elapsed = now_ts - row["last_roll_at"]
-        return max(0, 3600 - elapsed)
 
     def record_roll(conn, guild_id, user_id, now_ts) -> None:
         with conn:
@@ -132,7 +95,7 @@ class User:
                 (amount, guild_id, user_id),
             )
 
-    def get_emeralds(conn, guild_id: int, user_id: int) -> int:
+    def get_emeralds(conn, guild_id: int, user_id: int) -> tuple | None:
         with conn:
             return conn.execute(
                 """
@@ -143,7 +106,7 @@ class User:
                 (guild_id, user_id),
             ).fetchone()
 
-    def get_trading_hall_level(conn, guild_id: int, user_id: int) -> int:
+    def get_trading_hall_level(conn, guild_id: int, user_id: int) -> tuple | None:
         with conn:
             return conn.execute(
                 """
