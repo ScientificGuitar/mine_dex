@@ -1,0 +1,35 @@
+{
+  "farmer": {
+    "name": "Farmer",
+    "level": 1,
+    "price": 100,
+    "image": "https://static.wikia.nocookie.net/minecraft_gamepedia/images/1/12/Farmer_JE2.png",
+    "lore": "A diligent villager who teaches you how to turn duplicates into emeralds.",
+    "description": "Trade duplicate mobs for emeralds"
+  },
+  "cleric": {
+    "name": "Cleric",
+    "level": 2,
+    "price": 250,
+    "rarity": "Villager",
+    "image": "https://static.wikia.nocookie.net/minecraft_gamepedia/images/3/31/Cleric_JE2.png",
+    "lore": "A mysterious cleric who can transform duplicate mobs into magical roll tokens.",
+    "description": "Convert duplicate mobs into roll tokens"
+  },
+  "toolsmith": {
+    "name": "Toolsmith",
+    "level": 3,
+    "price": 500,
+    "image": "https://static.wikia.nocookie.net/minecraft_gamepedia/images/0/0e/Toolsmith_JE2.png",
+    "lore": "A skilled toolsmith who allows you one free reroll per day to correct your luck.",
+    "description": "Unlocks one reroll per day"
+  },
+  "librarian": {
+    "name": "Librarian",
+    "level": 4,
+    "price": 1000,
+    "image": "https://static.wikia.nocookie.net/minecraft_gamepedia/images/8/8e/Librarian_JE2.png",
+    "lore": "A wise librarian who teaches you how to perform a focused roll once per day, avoiding common mobs.",
+    "description": "Focused roll once per day (no Commons)"
+  }
+}

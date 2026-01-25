@@ -60,7 +60,7 @@ class User:
 
             return same_utc_day(row["last_focus_roll_at"], now_ts)
 
-    def get_roll_cooldown(conn, guild_id, user_id, now_ts):
+    def get_roll_cooldown(conn, guild_id, user_id, now_ts) -> int:
         with conn:
             row = conn.execute(
                 """
@@ -77,7 +77,7 @@ class User:
         elapsed = now_ts - row["last_roll_at"]
         return max(0, 3600 - elapsed)
 
-    def record_roll(conn, guild_id, user_id, now_ts):
+    def record_roll(conn, guild_id, user_id, now_ts) -> None:
         with conn:
             conn.execute(
                 """
@@ -88,7 +88,7 @@ class User:
                 (now_ts, guild_id, user_id),
             )
 
-    def record_reroll(conn, guild_id, user_id, now_ts):
+    def record_reroll(conn, guild_id, user_id, now_ts) -> None:
         with conn:
             conn.execute(
                 """
@@ -99,7 +99,7 @@ class User:
                 (now_ts, guild_id, user_id),
             )
 
-    def record_focus_roll(conn, guild_id, user_id, now_ts):
+    def record_focus_roll(conn, guild_id, user_id, now_ts) -> None:
         with conn:
             conn.execute(
                 """
@@ -132,11 +132,22 @@ class User:
                 (amount, guild_id, user_id),
             )
 
-    def get_emeralds(conn, guild_id: int, user_id: int) -> None:
+    def get_emeralds(conn, guild_id: int, user_id: int) -> int:
         with conn:
             return conn.execute(
                 """
                 SELECT emeralds
+                FROM users
+                WHERE guild_id = ? AND user_id = ?
+                """,
+                (guild_id, user_id),
+            ).fetchone()
+
+    def get_trading_hall_level(conn, guild_id: int, user_id: int) -> int:
+        with conn:
+            return conn.execute(
+                """
+                SELECT trading_hall_level
                 FROM users
                 WHERE guild_id = ? AND user_id = ?
                 """,

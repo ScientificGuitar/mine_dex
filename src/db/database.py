@@ -20,6 +20,7 @@ def init_db(conn: sqlite3.Connection) -> None:
         user_id             INTEGER NOT NULL,
 
         emeralds            INTEGER NOT NULL DEFAULT 0,
+        trading_hall_level  INTEGER NOT NULL DEFAULT 0,
 
         last_roll_at        INTEGER,
         last_claim_at       INTEGER,
@@ -35,19 +36,6 @@ def init_db(conn: sqlite3.Connection) -> None:
         mob_id    TEXT NOT NULL,
         amount  INTEGER NOT NULL DEFAULT 1,
         PRIMARY KEY (guild_id, user_id, mob_id),
-        FOREIGN KEY (guild_id, user_id)
-            REFERENCES users (guild_id, user_id)
-            ON DELETE CASCADE
-    );
-                         
-    CREATE TABLE IF NOT EXISTS villagers (
-        guild_id        INTEGER NOT NULL,
-        user_id         INTEGER NOT NULL,
-        villager_type   TEXT NOT NULL,
-        unlocked_at     INTEGER NOT NULL,
-
-        PRIMARY KEY (guild_id, user_id, villager_type),
-
         FOREIGN KEY (guild_id, user_id)
             REFERENCES users (guild_id, user_id)
             ON DELETE CASCADE

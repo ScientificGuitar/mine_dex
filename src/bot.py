@@ -4,16 +4,17 @@ import logging
 import logging.handlers
 from discord.ext import commands
 import asyncio
-from utils import mob_loader
+from utils import villager_loader, mob_loader
 from db.database import get_connection, init_db
 
 
 class MyBot(commands.Bot):
-    def __init__(self, *args, extentions: List[str], mobs, mobs_by_rarity, db, **kwargs):
+    def __init__(self, *args, extentions: List[str], mobs, mobs_by_rarity, villagers, db, **kwargs):
         super().__init__(*args, command_prefix="$", **kwargs)
         self.extentions = extentions
         self.mobs = mobs
         self.mobs_by_rarity = mobs_by_rarity
+        self.villagers = villagers
         self.db = db
 
     async def setup_hook(self) -> None:
@@ -41,13 +42,16 @@ async def main():
     logger.addHandler(handler)
 
     mobs, mobs_by_rarity = mob_loader.load_mob_data()
+    villagers = villager_loader.load_villagers()
     conn = get_connection()
     init_db(conn)
 
-    extentions = ["cogs.rolls"]
+    extentions = ["cogs.rolls", "cogs.shop"]
     intents = discord.Intents.default()
     intents.message_content = True
-    async with MyBot(extentions=extentions, intents=intents, mobs=mobs, mobs_by_rarity=mobs_by_rarity, db=conn) as bot:
+    async with MyBot(
+        extentions=extentions, intents=intents, mobs=mobs, mobs_by_rarity=mobs_by_rarity, villagers=villagers, db=conn
+    ) as bot:
         await bot.start("token")
 
 

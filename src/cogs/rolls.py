@@ -181,7 +181,7 @@ class Rolls(commands.Cog):
 
         for row in rows:
             mob = self.bot.mobs[row["mob_id"]]
-            mobs_by_rarity[mob["rarity"]].append(f"{mob['name']} x{row['quantity']}")
+            mobs_by_rarity[mob["rarity"]].append(f"{mob['name']} x{row['amount']}")
 
         embed = discord.Embed(title=f"{ctx.author.display_name}'s Collection", colour=discord.Colour.green())
 
