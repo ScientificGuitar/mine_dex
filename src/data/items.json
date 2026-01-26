@@ -1,0 +1,20 @@
+{
+  "token_uncommon_roll": {
+    "name": "Uncommon Roll Token",
+    "type": "token",
+    "rarity": "Uncommon",
+    "description": "Use to only roll Uncommon mobs"
+  },
+  "token_rare_roll": {
+    "name": "Rare Roll Token",
+    "type": "token",
+    "rarity": "Rare",
+    "description": "Use to only roll Rare mobs"
+  },
+  "token_epic_roll": {
+    "name": "Epic Roll Token",
+    "type": "token",
+    "rarity": "Epic",
+    "description": "Use to only roll Epic mobs"
+  }
+}

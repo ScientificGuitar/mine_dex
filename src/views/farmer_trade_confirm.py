@@ -3,7 +3,7 @@ from database.collection import Collection
 from database.user import User
 
 
-class TradeConfirm(discord.ui.View):
+class FarmerTradeConfirm(discord.ui.View):
     def __init__(self, bot, guild_id, user_id, mob_id, amount, emeralds, timeout=60):
         super().__init__(timeout=timeout)
         self.bot = bot

@@ -121,7 +121,7 @@ def get_villager_state(current_level: int, villager_level: int) -> str:
         return "locked"
 
 def get_villager_by_level(villagers: dict, level: int):
-    for key, villager in villagers.items():
+    for _, villager in villagers.items():
         if villager["level"] == level:
             return villager
-        return None
+    return None

@@ -4,17 +4,18 @@ import logging
 import logging.handlers
 from discord.ext import commands
 import asyncio
-from utils import villager_loader, mob_loader
+from utils import villager_loader, mob_loader, item_loader
 from database.db import get_connection, init_db
 
 
 class MyBot(commands.Bot):
-    def __init__(self, *args, extentions: List[str], mobs, mobs_by_rarity, villagers, db, **kwargs):
+    def __init__(self, *args, extentions: List[str], mobs, mobs_by_rarity, villagers, items, db, **kwargs):
         super().__init__(*args, command_prefix="$", **kwargs)
         self.extentions = extentions
         self.mobs = mobs
         self.mobs_by_rarity = mobs_by_rarity
         self.villagers = villagers
+        self.items = items
         self.db = db
 
     async def setup_hook(self) -> None:
@@ -43,6 +44,7 @@ async def main():
 
     mobs, mobs_by_rarity = mob_loader.load_mob_data()
     villagers = villager_loader.load_villagers()
+    items = item_loader.load_items()
     conn = get_connection()
     init_db(conn)
 
@@ -50,7 +52,13 @@ async def main():
     intents = discord.Intents.default()
     intents.message_content = True
     async with MyBot(
-        extentions=extentions, intents=intents, mobs=mobs, mobs_by_rarity=mobs_by_rarity, villagers=villagers, db=conn
+        extentions=extentions,
+        intents=intents,
+        mobs=mobs,
+        mobs_by_rarity=mobs_by_rarity,
+        villagers=villagers,
+        items=items,
+        db=conn,
     ) as bot:
         await bot.start("token")
 

@@ -2,8 +2,9 @@ from discord.ext import commands
 from database.user import User
 import discord
 from database.collection import Collection
-from constants import FARMER_EMERALD_VALUES
-from views.trade_confirm import TradeConfirm
+from constants import FARMER_EMERALD_VALUES, CLERIC_RARITY_TO_TOKEN
+from views.farmer_trade_confirm import FarmerTradeConfirm
+from views.cleric_trade_confirm import ClericTradeConfirm
 
 
 class Trade(commands.Cog):
@@ -11,7 +12,7 @@ class Trade(commands.Cog):
         self.bot = bot
 
     @commands.command()
-    async def trade(self, ctx, villager: str, mob_id: str, amount: int):
+    async def trade(self, ctx, villager: str = None, mob_id: str = None, mob_amount: int = None):
         guild_id = ctx.guild.id
         user_id = ctx.author.id
         User.ensure_user(self.bot.db, guild_id, user_id)
@@ -35,13 +36,13 @@ class Trade(commands.Cog):
             if user_mob_count <= 1:
                 await ctx.send("❌ You do not have duplicates of this mob.")
                 return
-            if amount >= user_mob_count:
-                await ctx.send(f"❌ You can only sell {user_mob_count - 1} of this mob.")
+            if mob_amount >= user_mob_count:
+                await ctx.send(f"❌ You can only trade a maximum of {user_mob_count - 1} of this mob.")
                 return
 
             rarity = mob["rarity"]
             value_per = FARMER_EMERALD_VALUES[rarity]
-            emeralds = amount * value_per
+            emeralds = mob_amount * value_per
 
             embed = discord.Embed(
                 title="Farmer Trade Offer",
@@ -49,28 +50,87 @@ class Trade(commands.Cog):
             )
             embed.add_field(
                 name="You Give",
-                value=f"🃏 **{mob['name']}** ×{amount}",
+                value=f"🃏 **{mob['name']}** x{mob_amount}",
                 inline=False,
             )
             embed.add_field(
                 name="You Receive",
-                value=f"💎 **Emeralds** ×{emeralds}",
+                value=f"💎 **Emeralds** x{emeralds}",
                 inline=False,
-            )
-            embed.add_field(
-                name="Rarity",
-                value=mob["rarity"],
-                inline=True,
             )
 
             embed.set_thumbnail(url=mob["image"])
             embed.set_footer(text="Confirming this trade will permanently remove the mobs.")
 
-            view = TradeConfirm(
-                bot=self.bot, guild_id=guild_id, user_id=user_id, mob_id=mob_id, amount=amount, emeralds=emeralds
+            view = FarmerTradeConfirm(
+                bot=self.bot, guild_id=guild_id, user_id=user_id, mob_id=mob_id, amount=mob_amount, emeralds=emeralds
             )
 
             await ctx.send(embed=embed, view=view)
+        elif villager == "cleric":
+            user_trading_hall_level = user["trading_hall_level"] if user else 0
+            if user_trading_hall_level < self.bot.villagers["cleric"]["level"]:
+                await ctx.send(
+                    "❌ Your village doesn't have a Cleric yet! Upgrade your Trading Hall to trade your duplicate mobs for tokens!"
+                )
+                return
+
+            mob = self.bot.mobs.get(mob_id)
+            if not mob:
+                await ctx.send("❌ That mob does not exist.")
+                return
+
+            row = Collection.get_mob_count(self.bot.db, guild_id, user_id, mob_id)
+            user_mob_count = row["amount"] if row else 0
+            if user_mob_count <= 1:
+                await ctx.send("❌ You do not have duplicates of this mob.")
+                return
+            if mob_amount >= user_mob_count:
+                await ctx.send(f"❌ You can only trade a maximum of {user_mob_count - 1} of this mob.")
+                return
+            if mob_amount % 2 != 0:
+                await ctx.send("❌ You need to trade in multiples of 2 for tokens.")
+                return
+
+            mob_rarity = mob["rarity"]
+            token_rarity = CLERIC_RARITY_TO_TOKEN[mob_rarity]
+            token_id = f"token_{token_rarity}_roll"
+            token_count = user_mob_count // 2
+            token = self.bot.items[token_id]
+
+            embed = discord.Embed(
+                title="Cleric Trade Offer",
+                colour=discord.Colour.green(),
+            )
+            embed.add_field(
+                name="You Give",
+                value=f"🃏 **{mob['name']}** x{mob_amount}",
+                inline=False,
+            )
+            embed.add_field(
+                name="You Receive",
+                value=f"🪙 **{token['name']}** x{token_count}",
+                inline=False,
+            )
+
+            embed.set_thumbnail(url=mob["image"])
+            embed.set_footer(text="Confirming this trade will permanently remove the mobs.")
+
+            view = ClericTradeConfirm(
+                bot=self.bot,
+                guild_id=guild_id,
+                user_id=user_id,
+                mob_id=mob_id,
+                mob_amount=mob_amount,
+                token_id=token_id,
+                token=token,
+            )
+
+            await ctx.send(embed=embed, view=view)
+
+        else:
+            await ctx.send("❌ That villager does not exist.")
+            return
 
 
 async def setup(bot):
