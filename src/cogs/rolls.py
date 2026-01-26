@@ -2,6 +2,7 @@ import discord
 from discord.ext import commands
 import random
 from database.user import User
+from database.inventory import Inventory
 import time
 from views.claim import Claim
 from constants import RARITY_WEIGHTS, RARITY_COLORS, VALID_TOKEN_RARITIES
@@ -114,7 +115,13 @@ class Rolls(commands.Cog):
             mob_id, mob = self.roll_random_mob(exclude={"Common"})
             User.record_focus_roll(self.bot.db, guild_id, user_id, now)
         elif roll_type == "token":
-            # TODO: Check if user has token and remove from inventory
+            inventory = Inventory.get_item(self.bot.db, guild_id, user_id, token_id)
+            token_count = inventory["amount"] if inventory else 0
+            if token_count <= 0:
+                await ctx.send("❌ You do not have enough of that token type.")
+                return
+
+            Inventory.add_to_inventory(self.bot.db, guild_id, user_id, token_id, -1)
             mob_id, mob = self.roll_random_mob(allowed={value.capitalize()})
             User.record_roll(self.bot.db, guild_id, user_id, now)
 
