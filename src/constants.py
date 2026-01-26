@@ -2,11 +2,11 @@ from discord import Colour
 
 RARITY_WEIGHTS = {"Common": 55, "Uncommon": 25, "Rare": 13, "Epic": 6, "Legendary": 1}
 RARITY_EMERALD_REWARDS = {
-    "Common": 1,
-    "Uncommon": 2,
-    "Rare": 4,
-    "Epic": 8,
-    "Legendary": 15,
+    "Common": 2,
+    "Uncommon": 5,
+    "Rare": 10,
+    "Epic": 20,
+    "Legendary": 50,
 }
 RARITY_EMOJIS = {
     "Common": ":white_circle:",
@@ -29,9 +29,9 @@ VALID_TOKEN_RARITIES = ["uncommon", "rare", "epic"]
 
 FARMER_EMERALD_VALUES = {
     "Common": 5,
-    "Uncommon": 12,
-    "Rare": 30,
-    "Epic": 75,
+    "Uncommon": 20,
+    "Rare": 50,
+    "Epic": 100,
     "Legendary": 200,
 }
 CLERIC_RARITY_TO_TOKEN = {"Common": "uncommon", "Uncommon": "rare", "Rare": "epic,"}
