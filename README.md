@@ -51,6 +51,13 @@ Rarity determines:
 ### $balance
 - Displays the player's current emerald count
 
+## Daily Rewards
+### $daily
+- Claim a daily reward once every 24 hours.
+- Gives a small amount of emeralds and a random common mob.
+- Can include streak bonuses.
+- Encourages daily engagement and accelerates early progression.
+
 ## Collection System
 ### $collection
 - Displays the player's collected mobs
@@ -65,6 +72,20 @@ Rarity determines:
 
 ### $mobs \<rarity\>
 - Lists mobs of a specific rarity
+
+## Inventory & Items
+### $inventory
+- Shows all items the player currently owns.
+- Includes tokens, consumables, and other special items.
+- Displays quantity and basic information for each item.
+
+### $item <item_id>
+- Shows detailed info about a specific item.
+- Displays:
+    - Item name
+    - Rarity (color-coded)
+    - Item type
+    - Description
 
 ## Shop System
 ### $shop
