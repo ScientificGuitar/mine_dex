@@ -1,10 +1,12 @@
 import sqlite3
 from pathlib import Path
+import os
 
-DB_PATH = Path(__file__).resolve().parent / "minedex.db"
+DB_PATH = Path(os.getenv("DB_PATH", Path(__file__).resolve().parent / "minedex.db"))
 
 
 def get_connection() -> sqlite3.Connection:
+    print(DB_PATH)
     conn = sqlite3.connect(DB_PATH)
     conn.row_factory = sqlite3.Row
     conn.execute("PRAGMA foreign_keys = ON;")

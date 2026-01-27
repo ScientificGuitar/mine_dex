@@ -1,3 +1,4 @@
+import os
 from typing import List
 import discord
 import logging
@@ -60,7 +61,8 @@ async def main():
         items=items,
         db=conn,
     ) as bot:
-        await bot.start("token")
+        print(os.getenv("DISCORD_TOKEN"))
+        await bot.start(os.getenv("DISCORD_TOKEN"))
 
 
 asyncio.run(main())
