@@ -89,21 +89,21 @@ class Rolls(commands.Cog):
             await ctx.send("❌ Invalid roll type. Try `$roll`, `$roll focus`, or `$roll token <rarity>`.")
             return
 
-        # last_claim_at = user["last_claim_at"] if user else 0
-        # if same_utc_day(last_claim_at, now):
-        #     await ctx.send("❌ You've already claimed today.")
-        #     return
+        last_claim_at = user["last_claim_at"] if user else 0
+        if same_utc_day(last_claim_at, now):
+            await ctx.send("❌ You've already claimed today.")
+            return
 
-        # last_roll_at = user["last_roll_at"] if user else None
-        # cooldown = get_cooldown_remaining(last_roll_at, now, 3600)
-        # if cooldown > 0:
-        #     minutes = cooldown // 60
-        #     if minutes == 0:
-        #         msg = "⏳ You can roll again in less than a minute."
-        #     else:
-        #         msg = f"⏳ You can roll again in **{minutes} minutes**."
-        #     await ctx.send(msg)
-        #     return
+        last_roll_at = user["last_roll_at"] if user else None
+        cooldown = get_cooldown_remaining(last_roll_at, now, 3600)
+        if cooldown > 0:
+            minutes = cooldown // 60
+            if minutes == 0:
+                msg = "⏳ You can roll again in less than a minute."
+            else:
+                msg = f"⏳ You can roll again in **{minutes} minutes**."
+            await ctx.send(msg)
+            return
 
         if roll_type == "standard":
             mob_id, mob = self.roll_random_mob()
