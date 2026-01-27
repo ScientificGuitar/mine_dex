@@ -30,7 +30,7 @@ class CollectionCog(commands.Cog):
             await self._mobs_by_rarity(ctx, rarity)
             return
 
-        self._all_mobs(ctx)
+        await self._all_mobs(ctx)
 
     @commands.command()
     async def mob(self, ctx, mob_id: str):
