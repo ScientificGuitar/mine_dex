@@ -84,6 +84,17 @@ class User:
                 (timestamp, guild_id, user_id),
             )
 
+    def update_last_daily_at(conn: Connection, guild_id: int, user_id: int, timestamp: int) -> None:
+        with conn:
+            conn.execute(
+                """
+                UPDATE users
+                SET last_daily_at = ?
+                WHERE guild_id = ? AND user_id = ?
+                """,
+                (timestamp, guild_id, user_id),
+            )
+
     def add_emeralds(conn: Connection, guild_id: int, user_id: int, amount: int) -> None:
         with conn:
             conn.execute(

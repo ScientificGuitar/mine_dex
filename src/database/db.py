@@ -2,7 +2,7 @@ import sqlite3
 from pathlib import Path
 import os
 
-DB_PATH = Path(os.getenv("DB_PATH", Path(__file__).resolve().parent / "minedex.db"))
+DB_PATH = Path(os.getenv("DB_PATH", Path(__file__).resolve().parent.parent.parent / "data/minedex.db"))
 
 
 def get_connection() -> sqlite3.Connection:
@@ -28,6 +28,7 @@ def init_db(conn: sqlite3.Connection) -> None:
         last_claim_at       INTEGER,
         last_focus_roll_at  INTEGER,
         last_reroll_at      INTEGER,
+        last_daily_at       INTEGER,
 
         PRIMARY KEY (guild_id, user_id)
     );

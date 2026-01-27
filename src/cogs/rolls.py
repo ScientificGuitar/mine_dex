@@ -159,6 +159,8 @@ async def setup(bot):
 
 
 def same_utc_day(ts1: int, ts2: int) -> bool:
+    if ts1 is None:
+        return False
     d1 = datetime.fromtimestamp(ts1, tz=timezone.utc).date()
     d2 = datetime.fromtimestamp(ts2, tz=timezone.utc).date()
     return d1 == d2
