@@ -31,9 +31,10 @@ class MyBot(commands.Bot):
 async def main():
     logger = logging.getLogger("discord")
     logger.setLevel(logging.DEBUG)
+    log_path = os.path.join(os.getenv("LOG_DIR", "logs"), "discord.log")
 
     handler = logging.handlers.RotatingFileHandler(
-        filename="discord.log",
+        filename=log_path,
         encoding="utf-8",
         maxBytes=32 * 1024 * 1024,  # 32 MiB
         backupCount=3,  # Rotate through 3 files
