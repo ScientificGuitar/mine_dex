@@ -13,7 +13,7 @@ The game is server-specific: each server maintains its own collections, progress
 7. Progression unlocks new gameplay mechanics
 
 ## Rolling & Claiming
-### $roll
+### &roll
 - Can be used once per hour
 - Randomly selects a mob based on rarity weights
 - Displays the mob in an embed
@@ -48,38 +48,38 @@ Rarity determines:
     - Trading Hall upgrades
     - Other shop items (future)
 
-### $balance
+### &balance
 - Displays the player's current emerald count
 
 ## Daily Rewards
-### $daily
+### &daily
 - Claim a daily reward once every 24 hours.
 - Gives a small amount of emeralds and a random common mob.
 - Can include streak bonuses.
 - Encourages daily engagement and accelerates early progression.
 
 ## Collection System
-### $collection
+### &collection
 - Displays the player's collected mobs
 - Shows duplicates where applicable
 - Collection is per-server
 
-### $mob \<mob_id\>
+### &mob \<mob_id\>
 - Shows detailed info about a specific mob
 
-### $mobs
+### &mobs
 - Lists all mobs, grouped by rarity
 
-### $mobs \<rarity\>
+### &mobs \<rarity\>
 - Lists mobs of a specific rarity
 
 ## Inventory & Items
-### $inventory
+### &inventory
 - Shows all items the player currently owns.
 - Includes tokens, consumables, and other special items.
 - Displays quantity and basic information for each item.
 
-### $item <item_id>
+### &item <item_id>
 - Shows detailed info about a specific item.
 - Displays:
     - Item name
@@ -88,7 +88,7 @@ Rarity determines:
     - Description
 
 ## Shop System
-### $shop
+### &shop
 Displays available shop categories.
 Currently available:
 - 🏛️ Trading Hall
@@ -97,13 +97,13 @@ Future categories may include:
 - Tokens & Boosts
 - Special Items
 
-### $shop \<category\>
+### &shop \<category\>
 - Shows detailed information about a specific shop category.
 
 ## Trading Hall (Progression System)
 The Trading Hall is a tiered upgrade system that unlocks new mechanics.
 ### Upgrade Command
-- `$shop upgrade trading`
+- `&shop upgrade trading`
 
 Upgrades must be purchased in order.
 
@@ -112,28 +112,28 @@ Upgrades must be purchased in order.
 - Unlocks trading duplicate mobs for emeralds
 - Command:
     ```
-    $trade farmer <mob_id> <amount>
+    &trade farmer <mob_id> <amount>
     ```
 **Tier 2 - Cleric (250 emeralds)**
 - Unlocks converting duplicate mobs into roll tokens
 - Tokens allow rarity-restricted rolls
 - Command:
     ```
-    $trade cleric <mob_id> <amount>
+    &trade cleric <mob_id> <amount>
     ```
 **Tier 3 - Toolsmith (500 emeralds)**
 - Unlocks one reroll per day
 - Reroll is not subject to the hourly cooldown
 - Command:
     ```
-    $reroll
+    &reroll
     ```
 **Tier 4 - Librarian (1000 emeralds)**
 - Unlocks one focused roll per day
 - Focused roll excludes Common mobs entirely
 - Command:
     ```
-    $roll focus
+    &roll focus
     ```
 
 ## Trading Flow
@@ -154,12 +154,12 @@ When a trade command is issued:
     - Epic Token
 
 ### Using Tokens
-`$roll <token>`
+`&roll <token>`
 - Consumes the token
 - Rolls a mob only within that rarity band
 
 ## Villager Information
-### $villager \<villager_id\>
+### &villager \<villager_id\>
 Displays:
 - Villager image
 - Description

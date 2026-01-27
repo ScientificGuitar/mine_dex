@@ -11,7 +11,7 @@ from database.db import get_connection, init_db
 
 class MyBot(commands.Bot):
     def __init__(self, *args, extentions: List[str], mobs, mobs_by_rarity, villagers, items, db, **kwargs):
-        super().__init__(*args, command_prefix="$", **kwargs)
+        super().__init__(*args, command_prefix="&", **kwargs)
         self.extentions = extentions
         self.mobs = mobs
         self.mobs_by_rarity = mobs_by_rarity

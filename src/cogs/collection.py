@@ -87,7 +87,7 @@ class CollectionCog(commands.Cog):
             )
 
         embed.set_footer(
-            text="Use $mobs <rarity> to filter by rarity\nUser $mob <mob_name> for more information about a specific mob"
+            text="Use $mobs <rarity> to filter by rarity\nUser &mob <mob_name> for more information about a specific mob"
         )
         await ctx.send(embed=embed)
 
