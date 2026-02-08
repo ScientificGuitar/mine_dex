@@ -87,7 +87,7 @@ class Help(commands.Cog):
             )
 
             embed.add_field(
-                name="🌾 Farmer - Emerald Trades",
+                name="Farmer - Emerald Trades",
                 value=(
                     "• Trade duplicates for emeralds\n"
                     "• Value scales by rarity\n"
@@ -96,7 +96,7 @@ class Help(commands.Cog):
                 inline=False,
             )
             embed.add_field(
-                name="✨ Cleric - Token Trades",
+                name="Cleric - Token Trades",
                 value=(
                     "• Convert duplicates into roll tokens\n"
                     "• Trades must be in multiples of 2\n"
