@@ -32,7 +32,7 @@ class Help(commands.Cog):
                 name="🧑‍🌾 Trading & Progression",
                 value=(
                     f"`{self.bot.command_prefix}trade farmer` - Trade duplicates for emeralds\n"
-                    f"`{self.bot.command_prefix}trade cleric` - Convert duplicates into tokens"
+                    f"`{self.bot.command_prefix}trade cleric` - Convert duplicates into tokens\n"
                     f"`{self.bot.command_prefix}shop` - Upgrade your Trading Hall\n"
                 ),
                 inline=False,
