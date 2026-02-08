@@ -18,7 +18,27 @@ class Trade(commands.Cog):
         User.ensure_user(self.bot.db, guild_id, user_id)
         user = User.get_user(self.bot.db, guild_id, user_id)
 
-        if villager.lower() == "farmer":
+        if villager is None:
+            await ctx.send(
+                "❌ You need to specify **which villager** you want to trade with.\n\n"
+                "Available villagers:\n"
+                "• **farmer** - trade duplicate mobs for emeralds\n"
+                "• **cleric** - trade duplicate mobs for roll tokens\n\n"
+                "Example:\n"
+                f"`{self.bot.command_prefix}trade farmer <mob_id> <amount>`"
+            )
+            return
+        if mob_id is None:
+            await ctx.send(
+                f"❌ You need to specify **which mob** you want to trade.\n\nExample:\n`{self.bot.command_prefix}trade <villager> zombie <amount>`"
+            )
+            return
+        if mob_amount is None:
+            await ctx.send(
+                f"❌ You need to specify **how many** mobs you want to trade.\n\nExample:\n`{self.bot.command_prefix}trade <villager> <mob_id> 1`"
+            )
+            return
+        elif villager.lower() == "farmer":
             user_trading_hall_level = user["trading_hall_level"] if user else 0
             if user_trading_hall_level < self.bot.villagers["farmer"]["level"]:
                 await ctx.send(
@@ -34,10 +54,16 @@ class Trade(commands.Cog):
             row = Collection.get_mob_count(self.bot.db, guild_id, user_id, mob_id)
             user_mob_count = row["amount"] if row else 0
             if user_mob_count <= 1:
-                await ctx.send("❌ You do not have duplicates of this mob.")
+                await ctx.send(
+                    "❌ You don't have any **duplicate copies** of this mob to trade.\n"
+                    "_The Farmer only buys duplicates._"
+                )
                 return
             if mob_amount >= user_mob_count:
-                await ctx.send(f"❌ You can only trade a maximum of {user_mob_count - 1} of this mob.")
+                await ctx.send(
+                    f"❌ You must keep **at least 1 copy** of each mob.\n"
+                    f"You can trade **up to {user_mob_count - 1}** of this mob."
+                )
                 return
 
             rarity = mob["rarity"]
@@ -82,14 +108,22 @@ class Trade(commands.Cog):
 
             row = Collection.get_mob_count(self.bot.db, guild_id, user_id, mob_id)
             user_mob_count = row["amount"] if row else 0
-            if user_mob_count <= 1:
-                await ctx.send("❌ You do not have duplicates of this mob.")
+            if user_mob_count <= 2:
+                await ctx.send(
+                    "❌ You need **at least 2 duplicate copies** of this mob to trade with the Cleric.\n"
+                    "_The Cleric converts duplicates into tokens (2 mobs → 1 token)._"
+                )
                 return
             if mob_amount >= user_mob_count:
-                await ctx.send(f"❌ You can only trade a maximum of {user_mob_count - 1} of this mob.")
+                await ctx.send(
+                    f"❌ You must keep **at least 1 copy** of each mob.\n"
+                    f"You can trade **up to {user_mob_count - 1}** of this mob."
+                )
                 return
             if mob_amount % 2 != 0:
-                await ctx.send("❌ You need to trade in multiples of 2 for tokens.")
+                await ctx.send(
+                    "❌ The Cleric only accepts **pairs of duplicates**.\n_Trade 2 mobs to receive 1 roll token._"
+                )
                 return
 
             mob_rarity = mob["rarity"]
@@ -127,9 +161,10 @@ class Trade(commands.Cog):
             )
 
             await ctx.send(embed=embed, view=view)
-
         else:
-            await ctx.send("❌ That villager does not exist.")
+            await ctx.send(
+                "❌ That villager does not exist.\nUse `{self.bot.command_prefix}help trading` for more information about trading"
+            )
             return
 
 

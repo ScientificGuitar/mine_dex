@@ -72,7 +72,7 @@ class Economy(commands.Cog):
                 inline=False,
             )
 
-        embed.set_footer(text="Use &item <item_id> to view details")
+        embed.set_footer(text=f"Use {self.bot.command_prefix}item <item_id> to view details")
         await ctx.send(embed=embed)
 
     @commands.command()

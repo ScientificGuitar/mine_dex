@@ -3,9 +3,10 @@ from discord.ext import commands
 import random
 from database.user import User
 from database.inventory import Inventory
+from database.collection import Collection
 import time
 from views.claim import Claim
-from constants import RARITY_WEIGHTS, RARITY_COLORS, VALID_TOKEN_RARITIES
+from constants import RARITY_WEIGHTS, RARITY_COLORS, VALID_TOKEN_RARITIES, RARITY_EMOJIS
 from datetime import datetime, timezone
 
 
@@ -86,7 +87,9 @@ class Rolls(commands.Cog):
             roll_type = mode
             token_id = f"token_{value}_roll"
         else:
-            await ctx.send("❌ Invalid roll type. Try `&roll`, `&roll focus`, or `&roll token <rarity>`.")
+            await ctx.send(
+                f"❌ Invalid roll type. Try `{self.bot.command_prefix}roll`, `{self.bot.command_prefix}roll focus`, or `{self.bot.command_prefix}roll token <rarity>`."
+            )
             return
 
         last_claim_at = user["last_claim_at"] if user else 0
@@ -125,10 +128,29 @@ class Rolls(commands.Cog):
             mob_id, mob = self.roll_random_mob(allowed={value.capitalize()})
             User.record_roll(self.bot.db, guild_id, user_id, now)
 
-        embed = discord.Embed(
-            title=mob["name"],
-            color=RARITY_COLORS.get(mob["rarity"], 0x2F3136),
-        )
+        row = Collection.get_mob_count(self.bot.db, guild_id, user_id, mob_id)
+        owned_amount = row["amount"] if row else 0
+
+        emoji = RARITY_EMOJIS.get(mob["rarity"], "❔")
+        color = RARITY_COLORS.get(mob["rarity"], 0x2F3136)
+
+        if owned_amount > 0:
+            embed = discord.Embed(
+                title=f"{emoji} {mob['name']} - Duplicate!",
+                description=(
+                    f"**Rarity:** {mob['rarity']}\n"
+                    f"**You already own:** {owned_amount}\n"
+                    "*💡 Duplicates can still be claimed.*"
+                ),
+                color=color,
+            )
+        else:
+            embed = discord.Embed(
+                title=f"{emoji} {mob['name']}",
+                description=f"**Rarity:** {mob['rarity']}",
+                color=color,
+            )
+
         embed.set_image(url=mob["image"])
         embed.set_footer(text=f"Rolled by: {ctx.author.display_name}")
 

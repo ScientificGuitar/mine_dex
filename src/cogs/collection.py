@@ -18,7 +18,7 @@ class CollectionCog(commands.Cog):
         rows = Collection.get_collection(self.bot.db, guild_id, user_id)
 
         if not rows:
-            await ctx.send("📭 Your collection is empty. Try `/roll`!")
+            await ctx.send(f"📭 Your collection is empty. Try `{self.bot.command_prefix}roll`!")
             return
 
         embed = self.build_collection_embed(ctx, rows)
@@ -87,7 +87,7 @@ class CollectionCog(commands.Cog):
             )
 
         embed.set_footer(
-            text="Use $mobs <rarity> to filter by rarity\nUser &mob <mob_name> for more information about a specific mob"
+            text=f"Use {self.bot.command_prefix}mobs <rarity> to filter by rarity\nUser {self.bot.command_prefix}mob <mob_name> for more information about a specific mob"
         )
         await ctx.send(embed=embed)
 

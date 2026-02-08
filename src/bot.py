@@ -11,7 +11,7 @@ from database.db import get_connection, init_db
 
 class MyBot(commands.Bot):
     def __init__(self, *args, extentions: List[str], mobs, mobs_by_rarity, villagers, items, db, **kwargs):
-        super().__init__(*args, command_prefix="&", **kwargs)
+        super().__init__(*args, command_prefix="&", help_command=None, **kwargs)
         self.extentions = extentions
         self.mobs = mobs
         self.mobs_by_rarity = mobs_by_rarity
@@ -50,7 +50,15 @@ async def main():
     conn = get_connection()
     init_db(conn)
 
-    extentions = ["cogs.rolls", "cogs.shop", "cogs.collection", "cogs.economy", "cogs.villagers", "cogs.trade"]
+    extentions = [
+        "cogs.rolls",
+        "cogs.shop",
+        "cogs.collection",
+        "cogs.economy",
+        "cogs.villagers",
+        "cogs.trade",
+        "cogs.help",
+    ]
     intents = discord.Intents.default()
     intents.message_content = True
     async with MyBot(

@@ -1,0 +1,152 @@
+import discord
+from discord.ext import commands
+
+
+class Help(commands.Cog):
+    def __init__(self, bot):
+        self.bot = bot
+
+    @commands.command()
+    async def help(self, ctx, section: str = None):
+        if section is None:
+            embed = discord.Embed(
+                title="📘 MobDex - How to Play",
+                description=(
+                    "Collect Minecraft mobs, earn emeralds, trade duplicates,\n"
+                    "and upgrade your village to unlock powerful features."
+                ),
+                color=0x2ECC71,
+            )
+
+            embed.add_field(
+                name="🟢 Getting Started",
+                value=(
+                    f"`{self.bot.command_prefix}roll` - Roll for a mob (hourly)\n"
+                    f"`{self.bot.command_prefix}daily` - Free emeralds + a common mob\n"
+                    f"`{self.bot.command_prefix}collection` - View your mobs\n"
+                    f"`{self.bot.command_prefix}balance` - Check your emeralds"
+                ),
+                inline=False,
+            )
+            embed.add_field(
+                name="🧑‍🌾 Trading & Progression",
+                value=(
+                    f"`{self.bot.command_prefix}trade farmer` - Trade duplicates for emeralds\n"
+                    f"`{self.bot.command_prefix}trade cleric` - Convert duplicates into tokens"
+                    f"`{self.bot.command_prefix}shop` - Upgrade your Trading Hall\n"
+                ),
+                inline=False,
+            )
+            embed.add_field(
+                name="📖 Learn More",
+                value=(
+                    f"`{self.bot.command_prefix}help rolls`\n`{self.bot.command_prefix}help trading`\n`{self.bot.command_prefix}help shop`\n`{self.bot.command_prefix}help tokens`"
+                ),
+                inline=False,
+            )
+
+            await ctx.send(embed=embed)
+            return
+
+        if section.lower() == "rolls":
+            embed = discord.Embed(title="🎲 Rolling & Claiming Mobs", color=0x3498DB)
+
+            embed.add_field(
+                name="Rolling",
+                value=(
+                    f"`{self.bot.command_prefix}roll`\n"
+                    "• Once per hour\n"
+                    "• Displays a mob with a Claim button\n"
+                    "• Claim expires after 1 hour"
+                ),
+                inline=False,
+            )
+
+            embed.add_field(
+                name="Claiming Rules",
+                value=(
+                    "• You may claim **once per day**\n"
+                    "• Claiming adds the mob to your collection\n"
+                    "• Awards emeralds based on rarity"
+                ),
+                inline=False,
+            )
+            embed.add_field(
+                name="Mob Rarities",
+                value=("Common - 55%\nUncommon - 25%\nRare - 13%\nEpic - 6%\nLegendary - 1%"),
+                inline=False,
+            )
+
+            await ctx.send(embed=embed)
+
+        if section.lower() == "trading":
+            embed = discord.Embed(
+                title="🧑‍🌾 Trading Duplicate Mobs",
+                description="Trading uses **duplicate mobs only**.\nYou will always keep **at least one copy** of a mob",
+                color=0xF1C40F,
+            )
+
+            embed.add_field(
+                name="Farmer - Emerald Trades",
+                value=(
+                    "• Trade duplicates for emeralds\n"
+                    "• Value scales by rarity\n"
+                    f"`{self.bot.command_prefix}trade farmer <mob_id> <amount>`"
+                ),
+                inline=False,
+            )
+            embed.add_field(
+                name="Cleric - Token Trades",
+                value=(
+                    "• Convert duplicates into roll tokens\n"
+                    "• Trades must be in multiples of 2\n"
+                    f"`{self.bot.command_prefix}trade cleric <mob_id> <amount>`"
+                ),
+                inline=False,
+            )
+
+            await ctx.send(embed=embed)
+
+        if section.lower() == "shop":
+            embed = discord.Embed(
+                title="🏛️ Trading Hall Progression",
+                description="Upgrade your village to unlock new mechanics.",
+                color=0x9B59B6,
+            )
+
+            embed.add_field(name="Tier 1 - Farmer (100 emeralds)", value="Trade duplicates for emeralds", inline=False)
+            embed.add_field(
+                name="Tier 2 - Cleric (250 emeralds)", value="Convert duplicates into roll tokens", inline=False
+            )
+            embed.add_field(
+                name="Tier 3 - Toolsmith (500 emeralds)",
+                value=f"Unlock one free reroll per day (`{self.bot.command_prefix}reroll`)",
+                inline=False,
+            )
+            embed.add_field(
+                name="Tier 4 - Librarian (1000 emeralds)",
+                value=f"Focused roll excluding Commons (`{self.bot.command_prefix}roll focus`)",
+                inline=False,
+            )
+
+            await ctx.send(embed=embed)
+
+        if section.lower() == "tokens":
+            embed = discord.Embed(title="🎟️ Roll Tokens", color=0xE67E22)
+
+            embed.add_field(name="Token Types", value=("• Uncommon Token\n• Rare Token\n• Epic Token"), inline=False)
+            embed.add_field(
+                name="Using Tokens",
+                value=(
+                    f"`{self.bot.command_prefix}roll <token>`\n"
+                    "• Consumes the token\n"
+                    "• Rolls only within that rarity band"
+                ),
+                inline=False,
+            )
+
+            await ctx.send(embed=embed)
+
+
+async def setup(bot):
+    await bot.add_cog(Help(bot))

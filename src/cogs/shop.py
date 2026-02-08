@@ -24,7 +24,7 @@ class Shop(commands.Cog):
                 title="🏪 Marketplace", description=f"💎 **Emeralds:** {emeralds}", color=discord.Color.gold()
             )
             embed.add_field(name="🏛️ Trading Hall", value="Upgrade your village to unlock new services", inline=False)
-            embed.set_footer(text="Use &shop <category> to browse")
+            embed.set_footer(text=f"Use {self.bot.command_prefix}shop <category> to browse")
 
             await ctx.send(embed=embed)
 
@@ -97,13 +97,13 @@ class Shop(commands.Cog):
                     )
                 else:
                     embed.add_field(
-                        name=f"🔒 {villager['name']} — Locked",
+                        name=f"🔒 {villager['name']} - Locked",
                         value=(f"• {villager['description']}"),
                         inline=False,
                     )
 
             embed.set_footer(
-                text="Use `&shop upgrade trading` to upgrade your trading hall and unlock the next villager"
+                text=f"Use `{self.bot.command_prefix}shop upgrade trading` to upgrade your trading hall and unlock the next villager"
             )
             await ctx.send(embed=embed)
 
