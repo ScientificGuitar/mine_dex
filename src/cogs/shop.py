@@ -97,7 +97,7 @@ class Shop(commands.Cog):
                     )
                 else:
                     embed.add_field(
-                        name=f"🔒 {villager['name']} — Locked",
+                        name=f"🔒 {villager['name']} - Locked",
                         value=(f"• {villager['description']}"),
                         inline=False,
                     )
