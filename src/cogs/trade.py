@@ -25,7 +25,17 @@ class Trade(commands.Cog):
                 "• **farmer** - trade duplicate mobs for emeralds\n"
                 "• **cleric** - trade duplicate mobs for roll tokens\n\n"
                 "Example:\n"
-                "`$trade farmer <mob_id> <amount>`"
+                f"`{self.bot.command_prefix}trade farmer <mob_id> <amount>`"
+            )
+            return
+        if mob_id is None:
+            await ctx.send(
+                f"❌ You need to specify **which mob** you want to trade.\n\nExample:\n`{self.bot.command_prefix}trade <villager> zombie <amount>`"
+            )
+            return
+        if mob_amount is None:
+            await ctx.send(
+                f"❌ You need to specify **how many** mobs you want to trade.\n\nExample:\n`{self.bot.command_prefix}trade <villager> <mob_id> 1`"
             )
             return
         elif villager.lower() == "farmer":
@@ -152,7 +162,9 @@ class Trade(commands.Cog):
 
             await ctx.send(embed=embed, view=view)
         else:
-            await ctx.send("❌ That villager does not exist.")
+            await ctx.send(
+                "❌ That villager does not exist.\nUse `{self.bot.command_prefix}help trading` for more information about trading"
+            )
             return
 
 
