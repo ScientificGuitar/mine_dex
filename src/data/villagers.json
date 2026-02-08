@@ -6,7 +6,7 @@
     "image": "https://minecraft.wiki/images/Plains_Farmer.png?b8e42",
     "lore": "A diligent villager who teaches you how to turn duplicates into emeralds.",
     "description": "Trade duplicate mobs for emeralds",
-    "commands": ["&trade farmer <mob> <amount>"]
+    "commands": ["trade farmer <mob> <amount>"]
   },
   "cleric": {
     "name": "Cleric",
@@ -16,7 +16,7 @@
     "image": "https://minecraft.wiki/images/Plains_Cleric.png?817d6",
     "lore": "A mysterious cleric who can transform duplicate mobs into magical roll tokens.",
     "description": "Convert duplicate mobs into roll tokens",
-    "commands": ["&trade cleric <mob> <amount>"]
+    "commands": ["trade cleric <mob> <amount>"]
   },
   "toolsmith": {
     "name": "Toolsmith",
@@ -25,7 +25,7 @@
     "image": "https://minecraft.wiki/images/Plains_Toolsmith.png?d03a0",
     "lore": "A skilled toolsmith who allows you one free reroll per day to correct your luck.",
     "description": "Unlocks one reroll per day",
-    "commands": ["&reroll"]
+    "commands": ["reroll"]
   },
   "librarian": {
     "name": "Librarian",
@@ -34,6 +34,6 @@
     "image": "https://minecraft.wiki/images/Plains_Librarian.png?f9177",
     "lore": "A wise librarian who teaches you how to perform a focused roll once per day, avoiding common mobs.",
     "description": "Focused roll once per day (no Commons)",
-    "commands": ["&roll focus"]
+    "commands": ["roll focus"]
   }
 }

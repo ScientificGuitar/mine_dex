@@ -86,7 +86,9 @@ class Rolls(commands.Cog):
             roll_type = mode
             token_id = f"token_{value}_roll"
         else:
-            await ctx.send("❌ Invalid roll type. Try `&roll`, `&roll focus`, or `&roll token <rarity>`.")
+            await ctx.send(
+                f"❌ Invalid roll type. Try `{self.bot.command_prefix}roll`, `{self.bot.command_prefix}roll focus`, or `{self.bot.command_prefix}roll token <rarity>`."
+            )
             return
 
         last_claim_at = user["last_claim_at"] if user else 0
