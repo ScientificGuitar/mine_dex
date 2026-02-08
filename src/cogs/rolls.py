@@ -5,7 +5,7 @@ from database.user import User
 from database.inventory import Inventory
 import time
 from views.claim import Claim
-from constants import RARITY_WEIGHTS, RARITY_COLORS, VALID_TOKEN_RARITIES
+from constants import RARITY_WEIGHTS, RARITY_COLORS, VALID_TOKEN_RARITIES, RARITY_EMOJIS
 from datetime import datetime, timezone
 
 
@@ -128,7 +128,8 @@ class Rolls(commands.Cog):
             User.record_roll(self.bot.db, guild_id, user_id, now)
 
         embed = discord.Embed(
-            title=mob["name"],
+            title=f"{RARITY_EMOJIS.get(mob['rarity'], '')} {mob['name']}",
+            description=f"**Rarity:** {mob['rarity']}",
             color=RARITY_COLORS.get(mob["rarity"], 0x2F3136),
         )
         embed.set_image(url=mob["image"])
