@@ -18,7 +18,17 @@ class Trade(commands.Cog):
         User.ensure_user(self.bot.db, guild_id, user_id)
         user = User.get_user(self.bot.db, guild_id, user_id)
 
-        if villager.lower() == "farmer":
+        if villager is None:
+            await ctx.send(
+                "❌ You need to specify **which villager** you want to trade with.\n\n"
+                "Available villagers:\n"
+                "• **farmer** - trade duplicate mobs for emeralds\n"
+                "• **cleric** - trade duplicate mobs for roll tokens\n\n"
+                "Example:\n"
+                "`$trade farmer <mob_id> <amount>`"
+            )
+            return
+        elif villager.lower() == "farmer":
             user_trading_hall_level = user["trading_hall_level"] if user else 0
             if user_trading_hall_level < self.bot.villagers["farmer"]["level"]:
                 await ctx.send(
@@ -141,7 +151,6 @@ class Trade(commands.Cog):
             )
 
             await ctx.send(embed=embed, view=view)
-
         else:
             await ctx.send("❌ That villager does not exist.")
             return
