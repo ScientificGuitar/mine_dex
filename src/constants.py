@@ -34,4 +34,4 @@ FARMER_EMERALD_VALUES = {
     "Epic": 100,
     "Legendary": 200,
 }
-CLERIC_RARITY_TO_TOKEN = {"Common": "uncommon", "Uncommon": "rare", "Rare": "epic,"}
+CLERIC_RARITY_TO_TOKEN = {"Common": "uncommon", "Uncommon": "rare", "Rare": "epic"}
