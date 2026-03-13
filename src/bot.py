@@ -1,12 +1,14 @@
-import os
-from typing import List
-import discord
+import asyncio
 import logging
 import logging.handlers
+import os
+from typing import List
+
+import discord
 from discord.ext import commands
-import asyncio
-from utils import villager_loader, mob_loader, item_loader
-from database.db import get_connection, init_db
+
+from database.db import SessionLocal, init_db
+from utils import item_loader, mob_loader, villager_loader
 
 
 class MyBot(commands.Bot):
@@ -20,9 +22,9 @@ class MyBot(commands.Bot):
         self.db = db
 
     async def setup_hook(self) -> None:
-        for extentions in self.extentions:
-            await self.load_extension(extentions)
-            print(f"loaded {extentions}")
+        for extention in self.extentions:
+            await self.load_extension(extention)
+            print(f"loaded {extention}")
 
     async def on_ready(self) -> None:
         print(f"We have logged in as {self.user}")
@@ -47,8 +49,7 @@ async def main():
     mobs, mobs_by_rarity = mob_loader.load_mob_data()
     villagers = villager_loader.load_villagers()
     items = item_loader.load_items()
-    conn = get_connection()
-    init_db(conn)
+    init_db()
 
     extentions = [
         "cogs.rolls",
@@ -68,10 +69,9 @@ async def main():
         mobs_by_rarity=mobs_by_rarity,
         villagers=villagers,
         items=items,
-        db=conn,
+        db=SessionLocal,
     ) as bot:
-        print(os.getenv("DISCORD_TOKEN"))
-        await bot.start(os.getenv("DISCORD_TOKEN"))
+        await bot.start(os.getenv("DISCORD_TOKEN", ""))
 
 
 asyncio.run(main())

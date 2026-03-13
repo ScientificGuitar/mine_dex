@@ -7,7 +7,7 @@ class Help(commands.Cog):
         self.bot = bot
 
     @commands.command()
-    async def help(self, ctx, section: str = None):
+    async def help(self, ctx, section: str | None = None):
         if section is None:
             embed = discord.Embed(
                 title="📘 MobDex - How to Play",

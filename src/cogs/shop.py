@@ -1,8 +1,9 @@
 import discord
 from discord.ext import commands
+
+from constants import TRADING_HALL_ORDER
 from database.user import User
 from views.upgrade_confirm import UpgradeTradingView
-from constants import TRADING_HALL_ORDER
 
 
 class Shop(commands.Cog):
@@ -10,15 +11,14 @@ class Shop(commands.Cog):
         self.bot = bot
 
     @commands.command()
-    async def shop(self, ctx, action: str = None, target: str = None):
+    async def shop(self, ctx, action: str | None = None, target: str | None = None):
         guild_id = ctx.guild.id
         user_id = ctx.author.id
         category = action.lower() if action else None
         User.ensure_user(self.bot.db, guild_id, user_id)
 
         if category is None:
-            row = User.get_emeralds(self.bot.db, guild_id, user_id)
-            emeralds = row["emeralds"] if row else 0
+            emeralds = User.get_emeralds(self.bot.db, guild_id, user_id) or 0
 
             embed = discord.Embed(
                 title="🏪 Marketplace", description=f"💎 **Emeralds:** {emeralds}", color=discord.Color.gold()
@@ -30,35 +30,37 @@ class Shop(commands.Cog):
 
         if category == "upgrade":
             if target == "trading":
-                row = User.get_trading_hall_level(self.bot.db, guild_id, user_id)
-                current_level = row["trading_hall_level"]
-                row = User.get_emeralds(self.bot.db, guild_id, user_id)
-                emeralds = row["emeralds"]
+                current_level = User.get_trading_hall_level(self.bot.db, guild_id, user_id) or 0
+                emeralds = User.get_emeralds(self.bot.db, guild_id, user_id) or 0
                 next_level = current_level + 1
 
-                villager = get_villager_by_level(self.bot.villagers, next_level)
-                if not villager:
+                next_villager = get_villager_by_level(self.bot.villagers, next_level)
+                if not next_villager:
                     await ctx.send("✅ Your Trading Hall is already fully upgraded.")
                     return
 
-                price = villager["price"]
+                price = next_villager["price"]
 
                 if emeralds < price:
                     await ctx.send(f"❌ You need **{price} emeralds**, but you only have **{emeralds}**.")
                     return
 
+                current_villager = (
+                    get_villager_by_level(self.bot.villagers, current_level) if current_level > 0 else None
+                )
+
                 embed = discord.Embed(
                     title="⬆️ Upgrade Trading Hall",
                     description=(
-                        f"**Current Tier:** {get_villager_by_level(self.bot.villagers, current_level)['name'] if current_level > 0 else 'None'}\n"
-                        f"**Next Tier:** {villager['name']}\n\n"
-                        f"**Unlocks:**\n• {villager['description']}\n\n"
+                        f"**Current Tier:** {current_villager['name'] if current_villager else 'None'}\n"
+                        f"**Next Tier:** {next_villager['name']}\n\n"
+                        f"**Unlocks:**\n• {next_villager['description']}\n\n"
                         f"💎 **Price:** {price} emeralds"
                     ),
                     color=discord.Color.gold(),
                 )
 
-                view = UpgradeTradingView(bot=self.bot, guild_id=guild_id, user_id=user_id, villager=villager)
+                view = UpgradeTradingView(bot=self.bot, guild_id=guild_id, user_id=user_id, villager=next_villager)
 
                 embed.set_footer(text="Confirm to upgrade your Trading Hall")
                 await ctx.send(embed=embed, view=view)
@@ -68,8 +70,7 @@ class Shop(commands.Cog):
                 return
 
         if category == "trading":
-            row = User.get_emeralds(self.bot.db, guild_id, user_id)
-            emeralds = row["emeralds"] if row else 0
+            emeralds = User.get_emeralds(self.bot.db, guild_id, user_id) or 0
 
             embed = discord.Embed(
                 title="🏛️ Trading Hall",
@@ -77,28 +78,29 @@ class Shop(commands.Cog):
                 color=discord.Color.gold(),
             )
 
-            row = User.get_trading_hall_level(self.bot.db, guild_id, user_id)
-            current_trading_level = row["trading_hall_level"] if row else 0
+            current_trading_level = User.get_trading_hall_level(self.bot.db, guild_id, user_id) or 0
             for villager_id in TRADING_HALL_ORDER:
-                villager = self.bot.villagers[villager_id]
-                state = get_villager_state(current_trading_level, villager["level"])
+                next_villager = self.bot.villagers[villager_id]
+                state = get_villager_state(current_trading_level, next_villager["level"])
 
                 if state == "owned":
                     embed.add_field(
-                        name=f"✅ {villager['name']} - Owned",
-                        value=(f"• {villager['description']}"),
+                        name=f"✅ {next_villager['name']} - Owned",
+                        value=(f"• {next_villager['description']}"),
                         inline=False,
                     )
                 elif state == "available":
                     embed.add_field(
-                        name=f"🔓 {villager['name']} - Available",
-                        value=(f"• {villager['description']}\n• **Price:** 💎 {villager['price']} emeralds\n"),
+                        name=f"🔓 {next_villager['name']} - Available",
+                        value=(
+                            f"• {next_villager['description']}\n• **Price:** 💎 {next_villager['price']} emeralds\n"
+                        ),
                         inline=False,
                     )
                 else:
                     embed.add_field(
-                        name=f"🔒 {villager['name']} - Locked",
-                        value=(f"• {villager['description']}"),
+                        name=f"🔒 {next_villager['name']} - Locked",
+                        value=(f"• {next_villager['description']}"),
                         inline=False,
                     )
 
@@ -120,7 +122,8 @@ def get_villager_state(current_level: int, villager_level: int) -> str:
     else:
         return "locked"
 
-def get_villager_by_level(villagers: dict, level: int):
+
+def get_villager_by_level(villagers: dict, level: int) -> dict | None:
     for _, villager in villagers.items():
         if villager["level"] == level:
             return villager

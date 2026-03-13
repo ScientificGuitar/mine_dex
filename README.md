@@ -26,8 +26,8 @@ Some useful commands:
 ## Running Locally:
 ### 1. Clone the Repository
 ```
-git clone https://github.com/ScientificGuitar/mine_dex.git
-cd mine_dex
+git clone https://github.com/ScientificGuitar/minedex.git
+cd minedex
 ```
 ### 2. Install Dependencies
 This project uses uv for dependency management and local development.

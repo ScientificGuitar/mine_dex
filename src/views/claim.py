@@ -1,8 +1,10 @@
-import discord
 import time
+
+import discord
+
+from constants import RARITY_EMERALD_REWARDS
 from database.collection import Collection
 from database.user import User
-from constants import RARITY_EMERALD_REWARDS
 
 
 class Claim(discord.ui.View):
@@ -32,7 +34,10 @@ class Claim(discord.ui.View):
         User.add_emeralds(self.bot.db, self.guild_id, self.user_id, reward)
 
         button.disabled = True
-        embed = interaction.message.embeds[0]
+        message = interaction.message
+        if message is None or not message.embeds:
+            return
+        embed = message.embeds[0]
         embed.set_footer(text=f"🗸 Claimed by: {interaction.user.display_name}")
         await interaction.response.edit_message(embed=embed, view=self)
         await interaction.followup.send(

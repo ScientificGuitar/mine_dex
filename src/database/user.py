@@ -1,146 +1,116 @@
 from datetime import datetime, timezone
-from sqlite3 import Connection
+
+from .db import User as UserModel
 
 
 class User:
-    def ensure_user(conn: Connection, guild_id: int, user_id: int) -> None:
-        with conn:
-            conn.execute(
-                """
-                INSERT OR IGNORE INTO users (guild_id, user_id)
-                VALUES (?, ?)
-                """,
-                (guild_id, user_id),
-            )
+    @staticmethod
+    def ensure_user(session_factory, guild_id: int, user_id: int) -> None:
+        """Ensure a user exists in the database, creating if necessary."""
+        with session_factory() as session:
+            user = session.query(UserModel).filter_by(guild_id=guild_id, user_id=user_id).first()
+            if not user:
+                user = UserModel(guild_id=guild_id, user_id=user_id)
+                session.add(user)
+                session.commit()
 
-    def get_user(conn: Connection, guild_id: int, user_id: int) -> tuple:
-        with conn:
-            return conn.execute(
-                """
-                SELECT *
-                FROM users
-                WHERE guild_id = ? AND user_id = ?
-                """,
-                (guild_id, user_id),
-            ).fetchone()
+    @staticmethod
+    def get_user(session_factory, guild_id: int, user_id: int) -> UserModel | None:
+        """Get a user by guild_id and user_id."""
+        with session_factory() as session:
+            return session.query(UserModel).filter_by(guild_id=guild_id, user_id=user_id).first()
 
-    def has_focus_rolled_today(conn: Connection, guild_id: int, user_id: int, now_ts: int) -> bool:
-        with conn:
-            row = conn.execute(
-                """
-                SELECT last_focus_roll_at
-                FROM users
-                WHERE guild_id = ? AND user_id = ?
-                """,
-                (guild_id, user_id),
-            ).fetchone()
+    @staticmethod
+    def has_focus_rolled_today(session_factory, guild_id: int, user_id: int, now_ts: int) -> bool:
+        """Check if user has already focus rolled today."""
+        with session_factory() as session:
+            user = session.query(UserModel).filter_by(guild_id=guild_id, user_id=user_id).first()
 
-            if row is None or row["last_focus_roll_at"] is None:
+            if user is None or user.last_focus_roll_at is None:
                 return False
 
-            return same_utc_day(row["last_focus_roll_at"], now_ts)
+            return same_utc_day(user.last_focus_roll_at, now_ts)
 
-    def record_roll(conn: Connection, guild_id, user_id, now_ts) -> None:
-        with conn:
-            conn.execute(
-                """
-                UPDATE users
-                SET last_roll_at = ?
-                WHERE guild_id = ? AND user_id = ?
-                """,
-                (now_ts, guild_id, user_id),
-            )
+    @staticmethod
+    def record_roll(session_factory, guild_id: int, user_id: int, now_ts: int) -> None:
+        """Record a roll timestamp for the user."""
+        with session_factory() as session:
+            user = session.query(UserModel).filter_by(guild_id=guild_id, user_id=user_id).first()
+            if user:
+                user.last_roll_at = now_ts
+                session.commit()
 
-    def record_reroll(conn: Connection, guild_id, user_id, now_ts) -> None:
-        with conn:
-            conn.execute(
-                """
-                UPDATE users
-                SET last_reroll_at = ?
-                WHERE guild_id = ? AND user_id = ?
-                """,
-                (now_ts, guild_id, user_id),
-            )
+    @staticmethod
+    def record_reroll(session_factory, guild_id: int, user_id: int, now_ts: int) -> None:
+        """Record a reroll timestamp for the user."""
+        with session_factory() as session:
+            user = session.query(UserModel).filter_by(guild_id=guild_id, user_id=user_id).first()
+            if user:
+                user.last_reroll_at = now_ts
+                session.commit()
 
-    def record_focus_roll(conn: Connection, guild_id, user_id, now_ts) -> None:
-        with conn:
-            conn.execute(
-                """
-                UPDATE users
-                SET last_focus_roll_at = ?
-                WHERE guild_id = ? AND user_id = ?
-                """,
-                (now_ts, guild_id, user_id),
-            )
+    @staticmethod
+    def record_focus_roll(session_factory, guild_id: int, user_id: int, now_ts: int) -> None:
+        """Record a focus roll timestamp for the user."""
+        with session_factory() as session:
+            user = session.query(UserModel).filter_by(guild_id=guild_id, user_id=user_id).first()
+            if user:
+                user.last_focus_roll_at = now_ts
+                session.commit()
 
-    def update_last_claim_at(conn: Connection, guild_id: int, user_id: int, timestamp: int) -> None:
-        with conn:
-            conn.execute(
-                """
-                UPDATE users
-                SET last_claim_at = ?
-                WHERE guild_id = ? AND user_id = ?
-                """,
-                (timestamp, guild_id, user_id),
-            )
+    @staticmethod
+    def update_last_claim_at(session_factory, guild_id: int, user_id: int, timestamp: int) -> None:
+        """Update the last claim timestamp."""
+        with session_factory() as session:
+            user = session.query(UserModel).filter_by(guild_id=guild_id, user_id=user_id).first()
+            if user:
+                user.last_claim_at = timestamp
+                session.commit()
 
-    def update_last_daily_at(conn: Connection, guild_id: int, user_id: int, timestamp: int) -> None:
-        with conn:
-            conn.execute(
-                """
-                UPDATE users
-                SET last_daily_at = ?
-                WHERE guild_id = ? AND user_id = ?
-                """,
-                (timestamp, guild_id, user_id),
-            )
+    @staticmethod
+    def update_last_daily_at(session_factory, guild_id: int, user_id: int, timestamp: int) -> None:
+        """Update the last daily command timestamp."""
+        with session_factory() as session:
+            user = session.query(UserModel).filter_by(guild_id=guild_id, user_id=user_id).first()
+            if user:
+                user.last_daily_at = timestamp
+                session.commit()
 
-    def add_emeralds(conn: Connection, guild_id: int, user_id: int, amount: int) -> None:
-        with conn:
-            conn.execute(
-                """
-                UPDATE users
-                SET emeralds = emeralds + ?
-                WHERE guild_id = ? AND user_id = ?
-                """,
-                (amount, guild_id, user_id),
-            )
+    @staticmethod
+    def add_emeralds(session_factory, guild_id: int, user_id: int, amount: int) -> None:
+        """Add emeralds to a user."""
+        with session_factory() as session:
+            user = session.query(UserModel).filter_by(guild_id=guild_id, user_id=user_id).first()
+            if user:
+                user.emeralds += amount
+                session.commit()
 
-    def get_emeralds(conn: Connection, guild_id: int, user_id: int) -> tuple | None:
-        with conn:
-            return conn.execute(
-                """
-                SELECT emeralds
-                FROM users
-                WHERE guild_id = ? AND user_id = ?
-                """,
-                (guild_id, user_id),
-            ).fetchone()
+    @staticmethod
+    def get_emeralds(session_factory, guild_id: int, user_id: int) -> int | None:
+        """Get the number of emeralds a user has."""
+        with session_factory() as session:
+            user = session.query(UserModel).filter_by(guild_id=guild_id, user_id=user_id).first()
+            return user.emeralds if user else None
 
-    def get_trading_hall_level(conn: Connection, guild_id: int, user_id: int) -> tuple | None:
-        with conn:
-            return conn.execute(
-                """
-                SELECT trading_hall_level
-                FROM users
-                WHERE guild_id = ? AND user_id = ?
-                """,
-                (guild_id, user_id),
-            ).fetchone()
+    @staticmethod
+    def get_trading_hall_level(session_factory, guild_id: int, user_id: int) -> int | None:
+        """Get the trading hall level for a user."""
+        with session_factory() as session:
+            user = session.query(UserModel).filter_by(guild_id=guild_id, user_id=user_id).first()
+            return user.trading_hall_level if user else None
 
-    def upgrade_trading_hall(conn: Connection, guild_id: int, user_id: int) -> None:
-        with conn:
-            conn.execute(
-                """
-                UPDATE users
-                SET trading_hall_level = trading_hall_level + 1
-                WHERE guild_id = ? AND user_id = ?
-                """,
-                (guild_id, user_id),
-            )
+    @staticmethod
+    def upgrade_trading_hall(session_factory, guild_id: int, user_id: int) -> None:
+        """Upgrade a user's trading hall level."""
+        with session_factory() as session:
+            user = session.query(UserModel).filter_by(guild_id=guild_id, user_id=user_id).first()
+            if user:
+                user.trading_hall_level += 1
+                session.commit()
 
 
 def same_utc_day(ts1: int, ts2: int) -> bool:
+    """Check if two timestamps are on the same UTC day."""
     d1 = datetime.fromtimestamp(ts1, tz=timezone.utc).date()
     d2 = datetime.fromtimestamp(ts2, tz=timezone.utc).date()
     return d1 == d2
