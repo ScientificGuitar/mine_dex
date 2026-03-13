@@ -1,13 +1,15 @@
+import random
+import time
+from datetime import datetime, timezone
+
 import discord
 from discord.ext import commands
-import random
-from database.user import User
-from database.inventory import Inventory
+
+from constants import RARITY_COLORS, RARITY_EMOJIS, RARITY_WEIGHTS, VALID_TOKEN_RARITIES
 from database.collection import Collection
-import time
+from database.inventory import Inventory
+from database.user import User
 from views.claim import Claim
-from constants import RARITY_WEIGHTS, RARITY_COLORS, VALID_TOKEN_RARITIES, RARITY_EMOJIS
-from datetime import datetime, timezone
 
 
 class Rolls(commands.Cog):
@@ -23,19 +25,19 @@ class Rolls(commands.Cog):
         User.ensure_user(self.bot.db, guild_id, user_id)
         user = User.get_user(self.bot.db, guild_id, user_id)
 
-        user_trading_hall_level = user["trading_hall_level"] if user else 0
+        user_trading_hall_level = user.trading_hall_level if user else 0
         if user_trading_hall_level < self.bot.villagers["toolsmith"]["level"]:
             await ctx.send(
                 "❌ Your village doesn't have a Toolsmith yet! Upgrade your Trading Hall to get one reroll per day."
             )
             return
 
-        last_claim_at = user["last_claim_at"] if user else 0
+        last_claim_at = user.last_claim_at if user else 0
         if same_utc_day(last_claim_at, now):
             await ctx.send("❌ You've already claimed today.")
             return
 
-        last_reroll_at = user["last_reroll_at"] if user else 0
+        last_reroll_at = user.last_reroll_at if user else 0
         if same_utc_day(last_reroll_at, now):
             await ctx.send("❌ You've already rerolled today.")
             return
@@ -56,7 +58,7 @@ class Rolls(commands.Cog):
         )
 
     @commands.command()
-    async def roll(self, ctx, mode: str = None, value: str = None):
+    async def roll(self, ctx, mode: str | None = None, value: str | None = None):
         mode = mode.lower() if mode else None
         value = value.lower() if value else None
 
@@ -70,7 +72,7 @@ class Rolls(commands.Cog):
         if mode is None:
             roll_type = "standard"
         elif mode == "focus":
-            user_trading_hall_level = user["trading_hall_level"] if user else 0
+            user_trading_hall_level = user.trading_hall_level if user else 0
             if user_trading_hall_level < self.bot.villagers["librarian"]["level"]:
                 await ctx.send(
                     "❌ Your village doesn't have a Librarian yet! Upgrade your Trading Hall to get one focus roll per day."
@@ -92,12 +94,12 @@ class Rolls(commands.Cog):
             )
             return
 
-        last_claim_at = user["last_claim_at"] if user else 0
+        last_claim_at = user.last_claim_at if user else 0
         if same_utc_day(last_claim_at, now):
             await ctx.send("❌ You've already claimed today.")
             return
 
-        last_roll_at = user["last_roll_at"] if user else None
+        last_roll_at = user.last_roll_at if user else None
         cooldown = get_cooldown_remaining(last_roll_at, now, 3600)
         if cooldown > 0:
             minutes = cooldown // 60
@@ -125,11 +127,10 @@ class Rolls(commands.Cog):
                 return
 
             Inventory.add_to_inventory(self.bot.db, guild_id, user_id, token_id, -1)
-            mob_id, mob = self.roll_random_mob(allowed={value.capitalize()})
+            mob_id, mob = self.roll_random_mob(allowed={value.capitalize()} if value else None)
             User.record_roll(self.bot.db, guild_id, user_id, now)
 
-        row = Collection.get_mob_count(self.bot.db, guild_id, user_id, mob_id)
-        owned_amount = row["amount"] if row else 0
+        owned_amount = Collection.get_mob_count(self.bot.db, guild_id, user_id, mob_id) or 0
 
         emoji = RARITY_EMOJIS.get(mob["rarity"], "❔")
         color = RARITY_COLORS.get(mob["rarity"], 0x2F3136)
@@ -180,8 +181,8 @@ async def setup(bot):
     await bot.add_cog(Rolls(bot))
 
 
-def same_utc_day(ts1: int, ts2: int) -> bool:
-    if ts1 is None:
+def same_utc_day(ts1: int | None, ts2: int | None) -> bool:
+    if ts1 is None or ts2 is None:
         return False
     d1 = datetime.fromtimestamp(ts1, tz=timezone.utc).date()
     d2 = datetime.fromtimestamp(ts2, tz=timezone.utc).date()

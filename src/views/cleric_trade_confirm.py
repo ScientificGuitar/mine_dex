@@ -1,6 +1,6 @@
 import discord
+
 from database.collection import Collection
-from database.user import User
 from database.inventory import Inventory
 
 

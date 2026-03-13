@@ -1,10 +1,11 @@
-from discord.ext import commands
-from database.user import User
 import discord
+from discord.ext import commands
+
+from constants import CLERIC_RARITY_TO_TOKEN, FARMER_EMERALD_VALUES
 from database.collection import Collection
-from constants import FARMER_EMERALD_VALUES, CLERIC_RARITY_TO_TOKEN
-from views.farmer_trade_confirm import FarmerTradeConfirm
+from database.user import User
 from views.cleric_trade_confirm import ClericTradeConfirm
+from views.farmer_trade_confirm import FarmerTradeConfirm
 
 
 class Trade(commands.Cog):
@@ -12,7 +13,7 @@ class Trade(commands.Cog):
         self.bot = bot
 
     @commands.command()
-    async def trade(self, ctx, villager: str = None, mob_id: str = None, mob_amount: int = None):
+    async def trade(self, ctx, villager: str | None = None, mob_id: str | None = None, mob_amount: int | None = None):
         guild_id = ctx.guild.id
         user_id = ctx.author.id
         User.ensure_user(self.bot.db, guild_id, user_id)
@@ -39,7 +40,7 @@ class Trade(commands.Cog):
             )
             return
         elif villager.lower() == "farmer":
-            user_trading_hall_level = user["trading_hall_level"] if user else 0
+            user_trading_hall_level = user.trading_hall_level if user else 0
             if user_trading_hall_level < self.bot.villagers["farmer"]["level"]:
                 await ctx.send(
                     "❌ Your village doesn't have a Farmer yet! Upgrade your Trading Hall to trade your duplicate mobs for emeralds!"
@@ -51,8 +52,7 @@ class Trade(commands.Cog):
                 await ctx.send("❌ That mob does not exist.")
                 return
 
-            row = Collection.get_mob_count(self.bot.db, guild_id, user_id, mob_id)
-            user_mob_count = row["amount"] if row else 0
+            user_mob_count = Collection.get_mob_count(self.bot.db, guild_id, user_id, mob_id) or 0
             if user_mob_count <= 1:
                 await ctx.send(
                     "❌ You don't have any **duplicate copies** of this mob to trade.\n"
@@ -94,7 +94,7 @@ class Trade(commands.Cog):
 
             await ctx.send(embed=embed, view=view)
         elif villager == "cleric":
-            user_trading_hall_level = user["trading_hall_level"] if user else 0
+            user_trading_hall_level = user.trading_hall_level if user else 0
             if user_trading_hall_level < self.bot.villagers["cleric"]["level"]:
                 await ctx.send(
                     "❌ Your village doesn't have a Cleric yet! Upgrade your Trading Hall to trade your duplicate mobs for tokens!"
@@ -106,8 +106,7 @@ class Trade(commands.Cog):
                 await ctx.send("❌ That mob does not exist.")
                 return
 
-            row = Collection.get_mob_count(self.bot.db, guild_id, user_id, mob_id)
-            user_mob_count = row["amount"] if row else 0
+            user_mob_count = Collection.get_mob_count(self.bot.db, guild_id, user_id, mob_id) or 0
             if user_mob_count <= 2:
                 await ctx.send(
                     "❌ You need **at least 2 duplicate copies** of this mob to trade with the Cleric.\n"

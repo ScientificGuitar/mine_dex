@@ -1,4 +1,5 @@
 import discord
+
 from database.user import User
 
 
@@ -22,9 +23,9 @@ class UpgradeTradingView(discord.ui.View):
     async def confirm(self, interaction: discord.Interaction, button: discord.ui.Button):
         price = self.villager["price"]
 
-        row = User.get_emeralds(self.bot.db, self.guild_id, self.user_id)
+        emeralds = User.get_emeralds(self.bot.db, self.guild_id, self.user_id) or 0
 
-        if row["emeralds"] < price:
+        if emeralds < price:
             await interaction.response.send_message("❌ You no longer have enough emeralds.", ephemeral=True)
             self.stop()
             return
@@ -32,7 +33,10 @@ class UpgradeTradingView(discord.ui.View):
         User.add_emeralds(self.bot.db, self.guild_id, self.user_id, -price)
         User.upgrade_trading_hall(self.bot.db, self.guild_id, self.user_id)
 
-        embed = interaction.message.embeds[0]
+        message = interaction.message
+        if message is None or not message.embeds:
+            return
+        embed = message.embeds[0]
         embed.title = "✅ Trading Hall Upgraded!"
         embed.color = discord.Color.green()
         embed.add_field(name="Unlocked", value=f"{self.villager['name']}", inline=False)

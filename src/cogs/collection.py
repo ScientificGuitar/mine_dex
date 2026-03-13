@@ -1,9 +1,11 @@
 from collections import defaultdict
-from discord.ext import commands
-from database.user import User
+
 import discord
+from discord.ext import commands
+
+from constants import RARITY_COLORS, RARITY_EMOJIS
 from database.collection import Collection
-from constants import RARITY_EMOJIS, RARITY_COLORS
+from database.user import User
 
 
 class CollectionCog(commands.Cog):
@@ -25,7 +27,7 @@ class CollectionCog(commands.Cog):
         await ctx.send(embed=embed)
 
     @commands.command()
-    async def mobs(self, ctx, rarity: str = None):
+    async def mobs(self, ctx, rarity: str | None = None):
         if rarity:
             await self._mobs_by_rarity(ctx, rarity)
             return
