@@ -1,10 +1,34 @@
-version: "3.9"
-
 services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: minedex-postgres
+    environment:
+      POSTGRES_DB: minedex
+      POSTGRES_USER: minedex
+      POSTGRES_PASSWORD: password
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U minedex -d minedex"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+      start_period: 5s
+
   bot:
+    build: .
     image: minedex-bot
     env_file: .env
     volumes:
-      - ./data:/app/data
       - ./logs:/app/logs
     restart: unless-stopped
+
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+volumes:
+  postgres_data:

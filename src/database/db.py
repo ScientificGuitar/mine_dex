@@ -1,61 +1,82 @@
-import sqlite3
-from pathlib import Path
 import os
+from contextlib import contextmanager
+from typing import Generator
 
-DB_PATH = Path(os.getenv("DB_PATH", Path(__file__).resolve().parent.parent.parent / "data/minedex.db"))
+from sqlalchemy import BigInteger, ForeignKeyConstraint, Integer, String, create_engine
+from sqlalchemy.orm import Mapped, Session, declarative_base, mapped_column, sessionmaker
+from sqlalchemy.pool import NullPool
+
+DATABASE_URL = os.getenv("DATABASE_URL")
+if not DATABASE_URL:
+    raise ValueError("DATABASE_URL environment variable is not set")
+
+engine = create_engine(DATABASE_URL, poolclass=NullPool, echo=False)
+SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+Base = declarative_base()
 
 
-def get_connection() -> sqlite3.Connection:
-    print(DB_PATH)
-    conn = sqlite3.connect(DB_PATH)
-    conn.row_factory = sqlite3.Row
-    conn.execute("PRAGMA foreign_keys = ON;")
-    return conn
+class User(Base):
+    __tablename__ = "users"
+
+    guild_id: Mapped[int] = mapped_column(BigInteger, primary_key=True, nullable=False)
+    user_id: Mapped[int] = mapped_column(BigInteger, primary_key=True, nullable=False)
+
+    emeralds: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
+    trading_hall_level: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
+
+    last_roll_at: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    last_claim_at: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    last_focus_roll_at: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    last_reroll_at: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    last_daily_at: Mapped[int | None] = mapped_column(Integer, nullable=True)
 
 
-def init_db(conn: sqlite3.Connection) -> None:
-    cursor = conn.cursor()
+class Collection(Base):
+    __tablename__ = "collections"
 
-    cursor.executescript("""
-    CREATE TABLE IF NOT EXISTS users (
-        guild_id            INTEGER NOT NULL,
-        user_id             INTEGER NOT NULL,
+    guild_id: Mapped[int] = mapped_column(BigInteger, primary_key=True, nullable=False)
+    user_id: Mapped[int] = mapped_column(BigInteger, primary_key=True, nullable=False)
+    mob_id: Mapped[str] = mapped_column(String, primary_key=True, nullable=False)
 
-        emeralds            INTEGER NOT NULL DEFAULT 0,
-        trading_hall_level  INTEGER NOT NULL DEFAULT 0,
+    amount: Mapped[int] = mapped_column(Integer, nullable=False, default=1)
 
-        last_roll_at        INTEGER,
-        last_claim_at       INTEGER,
-        last_focus_roll_at  INTEGER,
-        last_reroll_at      INTEGER,
-        last_daily_at       INTEGER,
+    __table_args__ = (
+        ForeignKeyConstraint(
+            ["guild_id", "user_id"],
+            ["users.guild_id", "users.user_id"],
+            ondelete="CASCADE",
+        ),
+    )
 
-        PRIMARY KEY (guild_id, user_id)
-    );
 
-    CREATE TABLE IF NOT EXISTS collections (
-        guild_id  INTEGER NOT NULL,
-        user_id   INTEGER NOT NULL,
-        mob_id    TEXT NOT NULL,
-        amount  INTEGER NOT NULL DEFAULT 1,
-        PRIMARY KEY (guild_id, user_id, mob_id),
-        FOREIGN KEY (guild_id, user_id)
-            REFERENCES users (guild_id, user_id)
-            ON DELETE CASCADE
-    );
-                         
-    CREATE TABLE IF NOT EXISTS inventory (
-        guild_id     INTEGER NOT NULL,
-        user_id      INTEGER NOT NULL,
-        item_id      TEXT NOT NULL,
-        amount       INTEGER NOT NULL DEFAULT 0,
+class Inventory(Base):
+    __tablename__ = "inventory"
 
-        PRIMARY KEY (guild_id, user_id, item_id),
+    guild_id: Mapped[int] = mapped_column(BigInteger, primary_key=True, nullable=False)
+    user_id: Mapped[int] = mapped_column(BigInteger, primary_key=True, nullable=False)
+    item_id: Mapped[str] = mapped_column(String, primary_key=True, nullable=False)
 
-        FOREIGN KEY (guild_id, user_id)
-            REFERENCES users (guild_id, user_id)
-            ON DELETE CASCADE
-    );
-    """)
+    amount: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
 
-    conn.commit()
+    __table_args__ = (
+        ForeignKeyConstraint(
+            ["guild_id", "user_id"],
+            ["users.guild_id", "users.user_id"],
+            ondelete="CASCADE",
+        ),
+    )
+
+
+@contextmanager
+def get_session() -> Generator[Session, None, None]:
+    """Context manager for database sessions."""
+    session = SessionLocal()
+    try:
+        yield session
+    finally:
+        session.close()
+
+
+def init_db() -> None:
+    """Initialize the database by creating all tables."""
+    Base.metadata.create_all(bind=engine)

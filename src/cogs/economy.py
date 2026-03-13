@@ -1,12 +1,14 @@
-from discord.ext import commands
-from database.user import User
-from database.inventory import Inventory
-from database.collection import Collection
-import discord
-from constants import RARITY_EMOJIS, RARITY_COLORS, RARITY_WEIGHTS
 import random
-from datetime import datetime, timezone
 import time
+from datetime import datetime, timezone
+
+import discord
+from discord.ext import commands
+
+from constants import RARITY_COLORS, RARITY_EMOJIS, RARITY_WEIGHTS
+from database.collection import Collection
+from database.inventory import Inventory
+from database.user import User
 
 
 class Economy(commands.Cog):
@@ -18,8 +20,7 @@ class Economy(commands.Cog):
         guild_id = ctx.guild.id
         user_id = ctx.author.id
         User.ensure_user(self.bot.db, guild_id, user_id)
-        row = User.get_emeralds(self.bot.db, guild_id, user_id)
-        emeralds = row["emeralds"] if row else 0
+        emeralds = User.get_emeralds(self.bot.db, guild_id, user_id)
 
         embed = discord.Embed(title=f"{ctx.author.display_name}'s Balance", colour=discord.Colour.green())
 
@@ -38,8 +39,8 @@ class Economy(commands.Cog):
         grouped = {}
 
         for item in inventory or []:
-            item_id = item["item_id"]
-            amount = item["amount"]
+            item_id = item.item_id
+            amount = item.amount
 
             if amount <= 0:
                 continue
@@ -95,11 +96,11 @@ class Economy(commands.Cog):
     async def daily(self, ctx):
         guild_id = ctx.guild.id
         user_id = ctx.author.id
-        now = time.time()
+        now = int(time.time())
         User.ensure_user(self.bot.db, guild_id, user_id)
 
         user = User.get_user(self.bot.db, guild_id, user_id)
-        last_daily_claim_at = user["last_daily_at"] if user else None
+        last_daily_claim_at = user.last_daily_at if user else None
         if same_utc_day(last_daily_claim_at, now):
             await ctx.send("❌ You've already claimed today.")
             return
@@ -152,8 +153,8 @@ async def setup(bot):
     await bot.add_cog(Economy(bot))
 
 
-def same_utc_day(ts1: int, ts2: int) -> bool:
-    if ts1 is None:
+def same_utc_day(ts1: int | None, ts2: int | None) -> bool:
+    if ts1 is None or ts2 is None:
         return False
     d1 = datetime.fromtimestamp(ts1, tz=timezone.utc).date()
     d2 = datetime.fromtimestamp(ts2, tz=timezone.utc).date()
