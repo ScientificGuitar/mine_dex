@@ -29,6 +29,7 @@ class User(Base):
     last_focus_roll_at: Mapped[int | None] = mapped_column(Integer, nullable=True)
     last_reroll_at: Mapped[int | None] = mapped_column(Integer, nullable=True)
     last_daily_at: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    timezone: Mapped[str | None] = mapped_column(String, nullable=True)
 
 
 class Collection(Base):

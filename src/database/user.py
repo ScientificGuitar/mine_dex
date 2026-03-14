@@ -1,4 +1,5 @@
 from datetime import datetime, timezone
+from zoneinfo import ZoneInfo
 
 from .db import User as UserModel
 
@@ -29,7 +30,7 @@ class User:
             if user is None or user.last_focus_roll_at is None:
                 return False
 
-            return same_utc_day(user.last_focus_roll_at, now_ts)
+            return same_utc_day(user.last_focus_roll_at, now_ts, user.timezone)
 
     @staticmethod
     def record_roll(session_factory, guild_id: int, user_id: int, now_ts: int) -> None:
@@ -108,9 +109,30 @@ class User:
                 user.trading_hall_level += 1
                 session.commit()
 
+    @staticmethod
+    def get_timezone(session_factory, guild_id: int, user_id: int) -> str | None:
+        """Get the timezone for a user."""
+        with session_factory() as session:
+            user = session.query(UserModel).filter_by(guild_id=guild_id, user_id=user_id).first()
+            return user.timezone if user else None
 
-def same_utc_day(ts1: int, ts2: int) -> bool:
-    """Check if two timestamps are on the same UTC day."""
-    d1 = datetime.fromtimestamp(ts1, tz=timezone.utc).date()
-    d2 = datetime.fromtimestamp(ts2, tz=timezone.utc).date()
+    @staticmethod
+    def set_timezone(session_factory, guild_id: int, user_id: int, timezone: str) -> None:
+        """Set the timezone for a user."""
+        with session_factory() as session:
+            user = session.query(UserModel).filter_by(guild_id=guild_id, user_id=user_id).first()
+            if user:
+                user.timezone = timezone
+                session.commit()
+
+
+def same_utc_day(ts1: int | None, ts2: int | None, tz_str: str | None = None) -> bool:
+    """Check if two timestamps are on the same day in the given timezone (or UTC if None)."""
+    if ts1 is None or ts2 is None:
+        return False
+
+    tz = ZoneInfo(tz_str) if tz_str else timezone.utc
+
+    d1 = datetime.fromtimestamp(ts1, tz=tz).date()
+    d2 = datetime.fromtimestamp(ts2, tz=tz).date()
     return d1 == d2

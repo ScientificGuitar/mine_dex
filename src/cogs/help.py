@@ -1,10 +1,44 @@
+from zoneinfo import ZoneInfo
+
 import discord
 from discord.ext import commands
+
+from database.user import User
 
 
 class Help(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
+
+    @commands.command()
+    async def timezone(self, ctx, tz: str | None = None):
+        guild_id = ctx.guild.id
+        user_id = ctx.author.id
+        User.ensure_user(self.bot.db, guild_id, user_id)
+
+        if tz is None:
+            current_tz = User.get_timezone(self.bot.db, guild_id, user_id)
+            if current_tz:
+                await ctx.send(f"🕐 Your current timezone is: `{current_tz}`")
+            else:
+                await ctx.send(
+                    "🕐 You haven't set a timezone yet. Use `&timezone <timezone>` to set one.\nExample: `&timezone Europe/London`"
+                )
+            return
+
+        # Validate timezone
+        try:
+            ZoneInfo(tz)
+        except Exception:
+            await ctx.send(
+                "❌ Invalid timezone. Please use a valid IANA timezone name like `America/New_York` or `Europe/London`."
+            )
+            return
+
+        User.set_timezone(self.bot.db, guild_id, user_id, tz)
+        await ctx.send(
+            f"✅ Your timezone has been set to `{tz}`. Rolls and daily limits will now reset based on this timezone."
+        )
 
     @commands.command()
     async def help(self, ctx, section: str | None = None):
@@ -24,7 +58,8 @@ class Help(commands.Cog):
                     f"`{self.bot.command_prefix}roll` - Roll for a mob (hourly)\n"
                     f"`{self.bot.command_prefix}daily` - Free emeralds + a common mob\n"
                     f"`{self.bot.command_prefix}collection` - View your mobs\n"
-                    f"`{self.bot.command_prefix}balance` - Check your emeralds"
+                    f"`{self.bot.command_prefix}balance` - Check your emeralds\n"
+                    f"`{self.bot.command_prefix}timezone` - Set your timezone for daily resets"
                 ),
                 inline=False,
             )
