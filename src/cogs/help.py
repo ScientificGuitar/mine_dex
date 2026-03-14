@@ -69,6 +69,7 @@ class Help(commands.Cog):
                 value=(
                     f"`{self.bot.command_prefix}trade farmer` - Trade duplicates for emeralds\n"
                     f"`{self.bot.command_prefix}trade cleric` - Convert duplicates into tokens\n"
+                    f"`{self.bot.command_prefix}farmer` / `{self.bot.command_prefix}cleric` - Alternative trade commands\n"
                     f"`{self.bot.command_prefix}shop` - Upgrade your Trading Hall\n"
                 ),
                 inline=False,
@@ -126,8 +127,11 @@ class Help(commands.Cog):
                 name="Farmer - Emerald Trades",
                 value=(
                     "• Trade duplicates for emeralds\n"
-                    "• Value scales by rarity\n"
-                    f"`{self.bot.command_prefix}trade farmer <mob_id> <amount>`"
+                    "• Value scales by rarity:\n"
+                    "  Common: 5💎 | Uncommon: 20💎 | Rare: 50💎\n"
+                    "  Epic: 100💎 | Legendary: 200💎\n"
+                    f"`{self.bot.command_prefix}trade farmer <mob_id> <amount>`\n"
+                    f"`{self.bot.command_prefix}farmer <mob_id> <amount>`"
                 ),
                 inline=False,
             )
@@ -135,8 +139,11 @@ class Help(commands.Cog):
                 name="Cleric - Token Trades",
                 value=(
                     "• Convert duplicates into roll tokens\n"
-                    "• Trades must be in multiples of 2\n"
-                    f"`{self.bot.command_prefix}trade cleric <mob_id> <amount>`"
+                    "• Trades must be in multiples of 2 (2 mobs → 1 token)\n"
+                    "• Only Common-Rare mobs can be traded for Uncommon-Epic tokens:\n"
+                    "  Common → Uncommon | Uncommon → Rare | Rare → Epic\n"
+                    f"`{self.bot.command_prefix}trade cleric <mob_id> <amount>`\n"
+                    f"`{self.bot.command_prefix}cleric <mob_id> <amount>`"
                 ),
                 inline=False,
             )

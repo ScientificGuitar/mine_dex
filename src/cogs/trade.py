@@ -13,12 +13,15 @@ class Trade(commands.Cog):
         self.bot = bot
 
     @commands.command()
-    async def trade(self, ctx, villager: str | None = None, mob_id: str | None = None, mob_amount: int | None = None):
-        guild_id = ctx.guild.id
-        user_id = ctx.author.id
-        User.ensure_user(self.bot.db, guild_id, user_id)
-        user = User.get_user(self.bot.db, guild_id, user_id)
+    async def farmer(self, ctx, mob_id: str | None = None, mob_amount: int | None = None):
+        await self._trade_with_villager(ctx, "farmer", mob_id, mob_amount)
 
+    @commands.command()
+    async def cleric(self, ctx, mob_id: str | None = None, mob_amount: int | None = None):
+        await self._trade_with_villager(ctx, "cleric", mob_id, mob_amount)
+
+    @commands.command(aliases=["trading"])
+    async def trade(self, ctx, villager: str | None = None, mob_id: str | None = None, mob_amount: int | None = None):
         if villager is None:
             await ctx.send(
                 "❌ You need to specify **which villager** you want to trade with.\n\n"
@@ -29,14 +32,23 @@ class Trade(commands.Cog):
                 f"`{self.bot.command_prefix}trade farmer <mob_id> <amount>`"
             )
             return
+
+        await self._trade_with_villager(ctx, villager, mob_id, mob_amount)
+
+    async def _trade_with_villager(self, ctx, villager: str, mob_id: str | None, mob_amount: int | None):
+        guild_id = ctx.guild.id
+        user_id = ctx.author.id
+        User.ensure_user(self.bot.db, guild_id, user_id)
+        user = User.get_user(self.bot.db, guild_id, user_id)
+
         if mob_id is None:
             await ctx.send(
-                f"❌ You need to specify **which mob** you want to trade.\n\nExample:\n`{self.bot.command_prefix}trade <villager> zombie <amount>`"
+                f"❌ You need to specify **which mob** you want to trade.\n\nExample:\n`{self.bot.command_prefix}{villager} <mob_id> <amount>`"
             )
             return
         if mob_amount is None:
             await ctx.send(
-                f"❌ You need to specify **how many** mobs you want to trade.\n\nExample:\n`{self.bot.command_prefix}trade <villager> <mob_id> 1`"
+                f"❌ You need to specify **how many** mobs you want to trade.\n\nExample:\n`{self.bot.command_prefix}{villager} <mob_id> 1`"
             )
             return
         elif villager.lower() == "farmer":
@@ -76,12 +88,12 @@ class Trade(commands.Cog):
             )
             embed.add_field(
                 name="You Give",
-                value=f"🃏 **{mob['name']}** x{mob_amount}",
+                value=f"🃏 **{mob['name']}** x{mob_amount} ({rarity})",
                 inline=False,
             )
             embed.add_field(
                 name="You Receive",
-                value=f"💎 **Emeralds** x{emeralds}",
+                value=f"💎 **Emeralds** x{emeralds} ({value_per}💎 each)",
                 inline=False,
             )
 
@@ -128,7 +140,7 @@ class Trade(commands.Cog):
             mob_rarity = mob["rarity"]
             token_rarity = CLERIC_RARITY_TO_TOKEN[mob_rarity]
             token_id = f"token_{token_rarity}_roll"
-            token_count = user_mob_count // 2
+            token_count = mob_amount // 2
             token = self.bot.items[token_id]
 
             embed = discord.Embed(
@@ -137,12 +149,12 @@ class Trade(commands.Cog):
             )
             embed.add_field(
                 name="You Give",
-                value=f"🃏 **{mob['name']}** x{mob_amount}",
+                value=f"🃏 **{mob['name']}** x{mob_amount} ({mob_rarity})",
                 inline=False,
             )
             embed.add_field(
                 name="You Receive",
-                value=f"🪙 **{token['name']}** x{token_count}",
+                value=f"🪙 **{token['name']}** x{token_count} (2 mobs → 1 token)",
                 inline=False,
             )
 
