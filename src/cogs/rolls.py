@@ -1,6 +1,5 @@
 import random
 import time
-from datetime import datetime, timezone
 
 import discord
 from discord.ext import commands
@@ -8,7 +7,7 @@ from discord.ext import commands
 from constants import RARITY_COLORS, RARITY_EMOJIS, RARITY_WEIGHTS, VALID_TOKEN_RARITIES
 from database.collection import Collection
 from database.inventory import Inventory
-from database.user import User
+from database.user import User, same_utc_day
 from views.claim import Claim
 
 
@@ -33,12 +32,13 @@ class Rolls(commands.Cog):
             return
 
         last_claim_at = user.last_claim_at if user else 0
-        if same_utc_day(last_claim_at, now):
+        user_tz = user.timezone if user else None
+        if same_utc_day(last_claim_at, now, user_tz):
             await ctx.send("❌ You've already claimed today.")
             return
 
         last_reroll_at = user.last_reroll_at if user else 0
-        if same_utc_day(last_reroll_at, now):
+        if same_utc_day(last_reroll_at, now, user_tz):
             await ctx.send("❌ You've already rerolled today.")
             return
 
@@ -95,7 +95,8 @@ class Rolls(commands.Cog):
             return
 
         last_claim_at = user.last_claim_at if user else 0
-        if same_utc_day(last_claim_at, now):
+        user_tz = user.timezone if user else None
+        if same_utc_day(last_claim_at, now, user_tz):
             await ctx.send("❌ You've already claimed today.")
             return
 
@@ -179,14 +180,6 @@ class Rolls(commands.Cog):
 
 async def setup(bot):
     await bot.add_cog(Rolls(bot))
-
-
-def same_utc_day(ts1: int | None, ts2: int | None) -> bool:
-    if ts1 is None or ts2 is None:
-        return False
-    d1 = datetime.fromtimestamp(ts1, tz=timezone.utc).date()
-    d2 = datetime.fromtimestamp(ts2, tz=timezone.utc).date()
-    return d1 == d2
 
 
 def get_cooldown_remaining(last_action_ts: int | None, now_ts: int, cooldown_seconds: int) -> int:
