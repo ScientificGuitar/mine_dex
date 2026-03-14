@@ -1,10 +1,44 @@
+from zoneinfo import ZoneInfo
+
 import discord
 from discord.ext import commands
+
+from database.user import User
 
 
 class Help(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
+
+    @commands.command()
+    async def timezone(self, ctx, tz: str | None = None):
+        guild_id = ctx.guild.id
+        user_id = ctx.author.id
+        User.ensure_user(self.bot.db, guild_id, user_id)
+
+        if tz is None:
+            current_tz = User.get_timezone(self.bot.db, guild_id, user_id)
+            if current_tz:
+                await ctx.send(f"🕐 Your current timezone is: `{current_tz}`")
+            else:
+                await ctx.send(
+                    "🕐 You haven't set a timezone yet. Use `&timezone <timezone>` to set one.\nExample: `&timezone Europe/London`"
+                )
+            return
+
+        # Validate timezone
+        try:
+            ZoneInfo(tz)
+        except Exception:
+            await ctx.send(
+                "❌ Invalid timezone. Please use a valid IANA timezone name like `America/New_York` or `Europe/London`."
+            )
+            return
+
+        User.set_timezone(self.bot.db, guild_id, user_id, tz)
+        await ctx.send(
+            f"✅ Your timezone has been set to `{tz}`. Rolls and daily limits will now reset based on this timezone."
+        )
 
     @commands.command()
     async def help(self, ctx, section: str | None = None):
@@ -24,7 +58,9 @@ class Help(commands.Cog):
                     f"`{self.bot.command_prefix}roll` - Roll for a mob (hourly)\n"
                     f"`{self.bot.command_prefix}daily` - Free emeralds + a common mob\n"
                     f"`{self.bot.command_prefix}collection` - View your mobs\n"
-                    f"`{self.bot.command_prefix}balance` - Check your emeralds"
+                    f"`{self.bot.command_prefix}missing` - See what mobs you haven't collected\n"
+                    f"`{self.bot.command_prefix}balance` - Check your emeralds\n"
+                    f"`{self.bot.command_prefix}timezone` - Set your timezone for daily resets"
                 ),
                 inline=False,
             )
@@ -33,6 +69,7 @@ class Help(commands.Cog):
                 value=(
                     f"`{self.bot.command_prefix}trade farmer` - Trade duplicates for emeralds\n"
                     f"`{self.bot.command_prefix}trade cleric` - Convert duplicates into tokens\n"
+                    f"`{self.bot.command_prefix}farmer` / `{self.bot.command_prefix}cleric` - Alternative trade commands\n"
                     f"`{self.bot.command_prefix}shop` - Upgrade your Trading Hall\n"
                 ),
                 inline=False,
@@ -90,8 +127,11 @@ class Help(commands.Cog):
                 name="Farmer - Emerald Trades",
                 value=(
                     "• Trade duplicates for emeralds\n"
-                    "• Value scales by rarity\n"
-                    f"`{self.bot.command_prefix}trade farmer <mob_id> <amount>`"
+                    "• Value scales by rarity:\n"
+                    "  Common: 5💎 | Uncommon: 20💎 | Rare: 50💎\n"
+                    "  Epic: 100💎 | Legendary: 200💎\n"
+                    f"`{self.bot.command_prefix}trade farmer <mob_id> <amount>`\n"
+                    f"`{self.bot.command_prefix}farmer <mob_id> <amount>`"
                 ),
                 inline=False,
             )
@@ -99,8 +139,11 @@ class Help(commands.Cog):
                 name="Cleric - Token Trades",
                 value=(
                     "• Convert duplicates into roll tokens\n"
-                    "• Trades must be in multiples of 2\n"
-                    f"`{self.bot.command_prefix}trade cleric <mob_id> <amount>`"
+                    "• Trades must be in multiples of 2 (2 mobs → 1 token)\n"
+                    "• Only Common-Rare mobs can be traded for Uncommon-Epic tokens:\n"
+                    "  Common → Uncommon | Uncommon → Rare | Rare → Epic\n"
+                    f"`{self.bot.command_prefix}trade cleric <mob_id> <amount>`\n"
+                    f"`{self.bot.command_prefix}cleric <mob_id> <amount>`"
                 ),
                 inline=False,
             )
@@ -114,20 +157,14 @@ class Help(commands.Cog):
                 color=0x9B59B6,
             )
 
-            embed.add_field(name="Tier 1 - Farmer (100 emeralds)", value="Trade duplicates for emeralds", inline=False)
-            embed.add_field(
-                name="Tier 2 - Cleric (250 emeralds)", value="Convert duplicates into roll tokens", inline=False
-            )
-            embed.add_field(
-                name="Tier 3 - Toolsmith (500 emeralds)",
-                value=f"Unlock one free reroll per day (`{self.bot.command_prefix}reroll`)",
-                inline=False,
-            )
-            embed.add_field(
-                name="Tier 4 - Librarian (1000 emeralds)",
-                value=f"Focused roll excluding Commons (`{self.bot.command_prefix}roll focus`)",
-                inline=False,
-            )
+            tier = 1
+            for _, villager in self.bot.villagers.items():
+                embed.add_field(
+                    name=f"Tier {tier} - {villager['name']} ({villager['price']} emeralds)",
+                    value=villager["description"],
+                    inline=False,
+                )
+                tier += 1
 
             await ctx.send(embed=embed)
 
