@@ -157,20 +157,14 @@ class Help(commands.Cog):
                 color=0x9B59B6,
             )
 
-            embed.add_field(name="Tier 1 - Farmer (100 emeralds)", value="Trade duplicates for emeralds", inline=False)
-            embed.add_field(
-                name="Tier 2 - Cleric (250 emeralds)", value="Convert duplicates into roll tokens", inline=False
-            )
-            embed.add_field(
-                name="Tier 3 - Toolsmith (500 emeralds)",
-                value=f"Unlock one free reroll per day (`{self.bot.command_prefix}reroll`)",
-                inline=False,
-            )
-            embed.add_field(
-                name="Tier 4 - Librarian (1000 emeralds)",
-                value=f"Focused roll excluding Commons (`{self.bot.command_prefix}roll focus`)",
-                inline=False,
-            )
+            tier = 1
+            for _, villager in self.bot.villagers.items():
+                embed.add_field(
+                    name=f"Tier {tier} - {villager['name']} ({villager['price']} emeralds)",
+                    value=villager["description"],
+                    inline=False,
+                )
+                tier += 1
 
             await ctx.send(embed=embed)
 
