@@ -29,6 +29,11 @@ class Shop(commands.Cog):
             await ctx.send(embed=embed)
 
         if category == "upgrade":
+            if target is None:
+                embed = build_upgrade_list_embed(self.bot, guild_id, user_id)
+                await ctx.send(embed=embed)
+                return
+
             if target == "trading":
                 current_level = User.get_trading_hall_level(self.bot.db, guild_id, user_id) or 0
                 emeralds = User.get_emeralds(self.bot.db, guild_id, user_id) or 0
@@ -66,7 +71,8 @@ class Shop(commands.Cog):
                 await ctx.send(embed=embed, view=view)
 
             else:
-                await ctx.send("❌ Unknown upgrade target.")
+                embed = build_upgrade_list_embed(self.bot, guild_id, user_id, invalid_target=target)
+                await ctx.send(embed=embed)
                 return
 
         if category == "trading":
@@ -112,6 +118,44 @@ class Shop(commands.Cog):
 
 async def setup(bot):
     await bot.add_cog(Shop(bot))
+
+
+def build_upgrade_list_embed(bot, guild_id: int, user_id: int, invalid_target: str | None = None) -> discord.Embed:
+    emeralds = User.get_emeralds(bot.db, guild_id, user_id) or 0
+    current_trading_level = User.get_trading_hall_level(bot.db, guild_id, user_id) or 0
+    next_trading_villager = get_villager_by_level(bot.villagers, current_trading_level + 1)
+
+    if invalid_target is None:
+        description = f"💎 **Emeralds:** {emeralds}\n\nChoose an upgrade to improve your village:"
+    else:
+        description = f"💎 **Emeralds:** {emeralds}\n\nUnknown upgrade target '{invalid_target}'. Available upgrades:"
+
+    embed = discord.Embed(
+        title="⬆️ Available Upgrades",
+        description=description,
+        color=discord.Color.gold(),
+    )
+
+    if next_trading_villager:
+        embed.add_field(
+            name="🏛️ Trading Hall - Available",
+            value=(
+                "Upgrade your trading hall to unlock the next villager tier.\n"
+                f"• **Next Tier:** {next_trading_villager['name']}\n"
+                f"• **Unlocks:** {next_trading_villager['description']}\n"
+                f"• **Price:** 💎 {next_trading_villager['price']} emeralds\n"
+                f"• **Use:** `{bot.command_prefix}shop upgrade trading`"
+            ),
+            inline=False,
+        )
+    else:
+        embed.add_field(
+            name="✅ Trading Hall - Fully Upgraded",
+            value="Your Trading Hall is already at maximum level.",
+            inline=False,
+        )
+
+    return embed
 
 
 def get_villager_state(current_level: int, villager_level: int) -> str:
