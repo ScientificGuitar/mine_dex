@@ -99,7 +99,7 @@ class CollectionCog(commands.Cog):
         ctx,
         rows,
         page: int = 1,
-        per_page: int = 3,
+        per_page: int = 10,
         rarity: str | None = None,
     ):
         rarity_order = ["Legendary", "Epic", "Rare", "Uncommon", "Common"]
